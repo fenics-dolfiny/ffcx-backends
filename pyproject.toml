@@ -25,4 +25,4 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 
 [project.optional-dependencies]
 lint = ["ruff", "yamllint"]
-test = ["pytest"]
+test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
