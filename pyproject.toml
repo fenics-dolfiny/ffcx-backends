@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ffcx-backends"
+version = "0.0.0"
+dependencies = []
+requires-python = ">=3.10"
+authors = []
+maintainers = []
+description = ""
+readme = "README.md"
+# license = ""
+# license-files = ["LICEN[CS]E.*"]
+# keywords = []
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[project.urls]
+Repository = "https://github.com/schnellerhase/ffcx-backends"
+"Bug Tracker" = "https://github.com/schnellerhase/ffcx-backends/issues"
+
+[project.optional-dependencies]
+lint = ["ruff", "yamllint"]
+test = ["pytest"]

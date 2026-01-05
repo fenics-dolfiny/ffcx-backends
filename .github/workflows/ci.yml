@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  # push:
+  pull_request:
+
+jobs:
+  lint:
+    name: ✨
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          pip-install: -e .[lint]
+          cache: pip
+      - run: ruff format --diff
+      - run: ruff check
+      - run: yamllint .
+
+  test:
+    name: ⚙️
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          # - macos-15
+          # - windows-2025
+        py:
+          # - "3.10"
+          # - "3.11"
+          - "3.12"
+          - "3.13"
+          # - "3.14"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.py }}
+          pip-install: -e .[test]
+          cache: pip
+      - run: pytest -v test/
