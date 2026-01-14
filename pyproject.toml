@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ffcx-backends"
 version = "0.0.0"
-dependencies = []
+dependencies = ["fenics-ffcx>=0.11.0.dev0"]
 requires-python = ">=3.10"
 authors = []
 maintainers = []
@@ -26,3 +26,6 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 [project.optional-dependencies]
 lint = ["ruff", "yamllint"]
 test = ["pytest"]
+
+[tools.setuptools]
+packages = ["ffcx_backends"]
