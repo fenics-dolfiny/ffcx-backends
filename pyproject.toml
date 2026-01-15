@@ -11,6 +11,7 @@ version = "0.0.0"
 dependencies = [
   "fenics-basix@git+https://github.com/fenics/basix@main",
   "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
+  "fenics-ufl@git+https://github.com/fenics/ufl@main",
 ]
 requires-python = ">=3.10"
 authors = []
