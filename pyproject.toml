@@ -2,10 +2,16 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tools.setuptools]
+packages = ["ffcx_backends"]
+
 [project]
-name = "ffcx-backends"
+name = "ffcx_backends"
 version = "0.0.0"
-dependencies = []
+dependencies = [
+  "fenics-basix@git+https://github.com/fenics/basix@main",
+  "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
+]
 requires-python = ">=3.10"
 authors = []
 maintainers = []
