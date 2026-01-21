@@ -5,15 +5,15 @@ import pprint
 import textwrap
 
 import numpy.typing as npt
-
 from ffcx import __version__ as FFCX_VERSION
 from ffcx.codegeneration import __version__ as UFC_VERSION
 from ffcx.codegeneration.common import template_keys
-from ffcx_backends.cuda import file_template
+
+from ffcx_backends.cuda.file_template import kernel_factory, metadata_factory
 
 logger = logging.getLogger("ffcx-backends")
 
-suffixes = (".cu",)
+suffixes = ("_cuda.c",".cu")
 
 def generator(
     options: dict[str, int | float | npt.DTypeLike],
@@ -28,9 +28,10 @@ def generator(
 
     """
     logger.info("Generating code for CUDA file")
-    
+
     # Attributes
     d = {"ffcx_version": FFCX_VERSION, "ufcx_version": UFC_VERSION}
     d["options"] = textwrap.indent(pprint.pformat(options), "// ")
-    assert set(d.keys()) == template_keys(file_template.factory)
-    return (file_template.factory.format_map(d),), ("",)
+    assert set(d.keys()) == template_keys(kernel_factory)
+    assert set(d.keys()) == template_keys(metadata_factory)
+    return (metadata_factory.format_map(d), kernel_factory.format_map(d)), ("","")

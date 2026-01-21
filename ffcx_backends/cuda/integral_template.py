@@ -1,5 +1,21 @@
 """Code generation strings for an integral."""
 
+metadata = """
+// Metadata for integral {factory_name}
+
+{enabled_coefficients_init}
+
+ufcx_integral {factory_name} =
+{{
+  .enabled_coefficients = {enabled_coefficients},
+  .needs_facet_permutations = {needs_facet_permutations},
+  .coordinate_element_hash = {coordinate_element_hash},
+  .domain = {domain},
+}};
+
+// end metadata for integral {factory_name}
+"""
+
 factory = """
 // Code for integral {factory_name}
 

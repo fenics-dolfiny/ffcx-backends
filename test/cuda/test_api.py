@@ -1,5 +1,7 @@
-import ffcx.main
 from pathlib import Path
+
+import ffcx.main
+
 
 def test_cuda_backend():
     """Test CUDA backend."""
