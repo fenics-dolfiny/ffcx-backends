@@ -21,6 +21,9 @@ jobs:
       - run: ruff format --diff
       - run: ruff check
       - run: yamllint .
+      - run: >
+          find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
+          xargs clang-format --dry-run --Werror
 
   test:
     name: ⚙️
