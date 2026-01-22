@@ -81,4 +81,4 @@ def generator(
 
     assert set(kernel_d.keys()) == template_keys(factory)
     assert set(metadata_d.keys()) == template_keys(metadata)
-    return (metadata.format_map(metadata_d), factory.format_map(kernel_d))
+    return (factory.format_map(kernel_d), metadata.format_map(metadata_d))

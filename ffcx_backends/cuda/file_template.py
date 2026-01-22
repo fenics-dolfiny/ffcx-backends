@@ -7,6 +7,8 @@ metadata_factory = """
 // This code was generated with the following options:
 //
 {options}
+
+#include <ufcx.h>
 """
 
 kernel_factory = """

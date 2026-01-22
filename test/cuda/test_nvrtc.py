@@ -1,7 +1,7 @@
-import os
 import importlib.util
-import subprocess
+import os
 import pathlib
+import subprocess
 
 
 def test_demo_nvrtc():

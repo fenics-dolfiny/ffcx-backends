@@ -13,7 +13,9 @@ from ffcx_backends.cuda.file_template import kernel_factory, metadata_factory
 
 logger = logging.getLogger("ffcx-backends")
 
-suffixes = ("_cuda.c",".cu")
+# Treat the CUDA file as a declaration so FFCx doesn't try to
+# compile it :)
+suffixes = (".cu", "_cuda.c")
 
 def generator(
     options: dict[str, int | float | npt.DTypeLike],
@@ -28,10 +30,10 @@ def generator(
 
     """
     logger.info("Generating code for CUDA file")
-
+    print("Calling CUDA generator.")
     # Attributes
     d = {"ffcx_version": FFCX_VERSION, "ufcx_version": UFC_VERSION}
     d["options"] = textwrap.indent(pprint.pformat(options), "// ")
     assert set(d.keys()) == template_keys(kernel_factory)
     assert set(d.keys()) == template_keys(metadata_factory)
-    return (metadata_factory.format_map(d), kernel_factory.format_map(d)), ("","")
+    return (kernel_factory.format_map(d), metadata_factory.format_map(d)), ("","")

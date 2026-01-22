@@ -43,6 +43,6 @@ ufcx_form {factory_name} =
 
 // Alias name
 ufcx_form* {name_from_uflfile} = &{factory_name};
-
+char** {name_from_uflfile}_names = form_integral_names_{factory_name};
 // End of code for form {factory_name}
 """

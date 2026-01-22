@@ -130,7 +130,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
             ]
         )
         d["form_integral_names_init"] = (
-            f"static char* form_integral_names_{ir.name} = {{{values}}};"
+            f"static char* form_integral_names_{ir.name}[{sizes}] = {{{values}}};"
         )
     else:
         d["form_integrals_init"] = ""
@@ -149,4 +149,4 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
     assert set(d.keys()) == template_keys(form_template.factory)
     implementation = form_template.factory.format_map(d)
 
-    return implementation, ""
+    return "", implementation

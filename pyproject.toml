@@ -34,9 +34,6 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 lint = ["ruff", "yamllint"]
 test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
 
-[tools.setuptools]
-packages = ["ffcx_backends"]
-
 [tool.ruff]
 line-length = 100
 indent-width = 4
