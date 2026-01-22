@@ -31,7 +31,7 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 "Bug Tracker" = "https://github.com/schnellerhase/ffcx-backends/issues"
 
 [project.optional-dependencies]
-lint = ["ruff", "yamllint"]
+lint = ["clang-format", "ruff", "yamllint"]
 test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
 
 [tool.ruff]
@@ -43,7 +43,7 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
-    # "N", # pep8-naming
+    "N",   # pep8-naming
     "E",   # pycodestyle
     "W",   # pycodestyle
     "D",   # pydocstyle
@@ -55,9 +55,9 @@ select = [
     "NPY", # numpy-specific rules
     "FLY", # use f-string not static joins
     "LOG", # https://docs.astral.sh/ruff/rules/#flake8-logging-log
-    # "ISC", # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
-    # "B", # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-    # "A", # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    "ISC", # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
+    "B",   # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+    "A",   # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
 ]
 ignore = ["RUF005", "RUF012", "RUF015"]
 
@@ -66,4 +66,3 @@ ignore = ["RUF005", "RUF012", "RUF015"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
