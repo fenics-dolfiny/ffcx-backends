@@ -17,6 +17,7 @@ logger = logging.getLogger("ffcx-backends")
 # compile it :)
 suffixes = (".cu", "_cuda.c")
 
+
 def generator(
     options: dict[str, int | float | npt.DTypeLike],
 ) -> tuple[tuple[str], tuple[str]]:
@@ -36,4 +37,4 @@ def generator(
     d["options"] = textwrap.indent(pprint.pformat(options), "// ")
     assert set(d.keys()) == template_keys(kernel_factory)
     assert set(d.keys()) == template_keys(metadata_factory)
-    return (kernel_factory.format_map(d), metadata_factory.format_map(d)), ("","")
+    return (kernel_factory.format_map(d), metadata_factory.format_map(d)), ("", "")

@@ -15,6 +15,7 @@ from ffcx_backends.cuda.integral_template import factory, metadata
 
 logger = logging.getLogger("ffcx-backends")
 
+
 def generator(
     ir: IntegralIR, domain: basix.CellType, options: dict[str, int | float | npt.DTypeLike]
 ) -> tuple[str, str]:
@@ -49,13 +50,13 @@ def generator(
     body = format(parts)
 
     # Generate generic FFCx code snippets and add specific parts
-    kernel_d: dict[str,str] = {}
+    kernel_d: dict[str, str] = {}
 
     kernel_d["factory_name"] = factory_name
 
     kernel_d["tabulate_tensor"] = body
-    kernel_d["scalar_type"] = dtype_to_c_type(options["scalar_type"]) # type: ignore
-    kernel_d["geom_type"] = dtype_to_c_type(dtype_to_scalar_dtype(options["scalar_type"])) # type: ignore
+    kernel_d["scalar_type"] = dtype_to_c_type(options["scalar_type"])  # type: ignore
+    kernel_d["geom_type"] = dtype_to_c_type(dtype_to_scalar_dtype(options["scalar_type"]))  # type: ignore
 
     metadata_d: dict[str, str] = {}
     metadata_d["factory_name"] = factory_name
@@ -75,7 +76,7 @@ def generator(
     assert ir.expression.coordinate_element_hash is not None
     metadata_d["coordinate_element_hash"] = f"UINT64_C({ir.expression.coordinate_element_hash})"
     metadata_d["needs_facet_permutations"] = (
-            "true" if ir.expression.needs_facet_permutations else "false"
+        "true" if ir.expression.needs_facet_permutations else "false"
     )
     metadata_d["domain"] = int(domain)
 
