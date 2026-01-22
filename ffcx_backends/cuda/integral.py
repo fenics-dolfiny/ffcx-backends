@@ -46,8 +46,8 @@ def generator(
     parts = ig.generate(domain)
 
     # Format code as string
-    format = Formatter(options["scalar_type"])  # type: ignore
-    body = format(parts)
+    formatter = Formatter(options["scalar_type"])  # type: ignore
+    body = formatter(parts)
 
     # Generate generic FFCx code snippets and add specific parts
     kernel_d: dict[str, str] = {}

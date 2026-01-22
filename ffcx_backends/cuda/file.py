@@ -5,8 +5,8 @@ import pprint
 import textwrap
 
 import numpy.typing as npt
-from ffcx import __version__ as FFCX_VERSION
-from ffcx.codegeneration import __version__ as UFC_VERSION
+from ffcx import __version__ as ffcx_version
+from ffcx.codegeneration import __version__ as ufc_version
 from ffcx.codegeneration.common import template_keys
 
 from ffcx_backends.cuda.file_template import kernel_factory, metadata_factory
@@ -33,7 +33,7 @@ def generator(
     logger.info("Generating code for CUDA file")
     print("Calling CUDA generator.")
     # Attributes
-    d = {"ffcx_version": FFCX_VERSION, "ufcx_version": UFC_VERSION}
+    d = {"ffcx_version": ffcx_version, "ufcx_version": ufc_version}
     d["options"] = textwrap.indent(pprint.pformat(options), "// ")
     assert set(d.keys()) == template_keys(kernel_factory)
     assert set(d.keys()) == template_keys(metadata_factory)

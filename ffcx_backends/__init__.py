@@ -1,3 +1,4 @@
 """FFCx-backends.
 
-A collection of language backends for FFCx."""
+A collection of language backends for FFCx.
+"""

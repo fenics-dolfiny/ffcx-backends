@@ -63,7 +63,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
         ]
         names = [f"constant_shapes_{ir.name}_{i}" for i in range(ir.num_constants)]
         shapes1 = f"static const int* constant_shapes_{ir.name}[{ir.num_constants}] = " + "{"
-        for rank, name in zip(ir.constant_ranks, names):
+        for rank, name in zip(ir.constant_ranks, names, strict=True):
             if rank > 0:
                 shapes1 += f"{name},\n"
             else:
@@ -110,7 +110,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
         values = ", ".join(
             [
                 f"&{name}_{domain.name}"
-                for name, domains in zip(integrals.names, integrals.domains)
+                for name, domains in zip(integrals.names, integrals.domains, strict=True)
                 for domain in domains
             ]
         )
@@ -119,14 +119,16 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
         )
         d["form_integrals"] = f"form_integrals_{ir.name}"
         values = ", ".join(
-            f"{i}" for i, domains in zip(integrals.ids, integrals.domains) for _ in domains
+            f"{i}"
+            for i, domains in zip(integrals.ids, integrals.domains, strict=True)
+            for _ in domains
         )
         d["form_integral_ids_init"] = f"int form_integral_ids_{ir.name}[{sizes}] = {{{values}}};"
         d["form_integral_ids"] = f"form_integral_ids_{ir.name}"
         values = ", ".join(
             [
                 f'"{name}_{domain.name}"'
-                for name, domains in zip(integrals.names, integrals.domains)
+                for name, domains in zip(integrals.names, integrals.domains, strict=True)
                 for domain in domains
             ]
         )
