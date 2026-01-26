@@ -1,10 +1,28 @@
-// See https://aka.ms/devcontainer.json.
 {
-	"name": "FFCx-backends",
-	"image": "mcr.microsoft.com/devcontainers/python:2-3.12",
-	// "features": {},
-	// "forwardPorts": [],
-	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y libblas-dev liblapack-dev && pip install -e .[lint,test]",
-	// "customizations": {},
-	// "remoteUser": "root"
+    "name": "FFCx-backends",
+    "image": "mcr.microsoft.com/devcontainers/python:2-3.12",
+    "customizations": {
+            "vscode": {
+                "extensions": [
+                    "charliermarsh.ruff",
+                    "gitlab.gitlab-workflow",
+                    "ms-python.mypy-type-checker",
+                    "ms-toolsai.jupyter",
+                    "tamasfe.even-better-toml"
+                ],
+                "settings": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": "explicit",
+                        "source.fixAll": "explicit"
+                    },
+                    "ruff.nativeServer": true
+                }
+            }
+        },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libblas-dev liblapack-dev && pip install -e .[lint,test]"
 }

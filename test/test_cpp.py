@@ -1,11 +1,8 @@
-import pathlib
-
 import basix
 import ufl
-
-import ffcx
 from ffcx.compiler import compile_ufl_objects
 from ffcx.options import get_options
+
 
 def test_integral():
     element = basix.ufl.element("Lagrange", "triangle", 1)
@@ -19,4 +16,4 @@ def test_integral():
 
     compiled_objects = compile_ufl_objects([a], opts)
 
-    decl = compiled_objects[0][0]
+    assert len(compiled_objects) == 2
