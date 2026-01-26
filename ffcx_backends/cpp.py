@@ -1,13 +1,15 @@
+"""Custom C++ FFCx backend."""
+
 import logging
 import pprint
 import string
 import textwrap
 
 import basix
-import ffcx.codegeneration.lnodes as L
+import ffcx.codegeneration.lnodes as L  # noqa
 import numpy as np
-from ffcx import __version__ as FFCX_VERSION
-from ffcx.codegeneration import __version__ as UFC_VERSION
+from ffcx import __version__ as FFCX_VERSION  # noqa
+from ffcx.codegeneration import __version__ as UFC_VERSION  # noqa
 from ffcx.codegeneration.backend import FFCXBackend
 from ffcx.codegeneration.expression_generator import ExpressionGenerator
 from ffcx.codegeneration.integral_generator import IntegralGenerator
@@ -17,7 +19,7 @@ from ffcx.ir.representation import IntegralIR
 logger = logging.getLogger("ffcx")
 
 
-class Formatter:
+class Formatter:  # noqa
     math_table = {
         "sqrt": "std::sqrt",
         "abs": "std::abs",
@@ -723,14 +725,14 @@ class form:  # noqa
             unsorted_integrals = []
             unsorted_ids = []
             unsorted_domains = []
-            for name, domains, id in zip(
+            for name, domains, integral_id in zip(
                 ir.integral_names[itg_type],
                 ir.integral_domains[itg_type],
                 ir.subdomain_ids[itg_type],
                 strict=True,
             ):
                 unsorted_integrals += [f"&{name}"]
-                unsorted_ids += [id]
+                unsorted_ids += [integral_id]
                 unsorted_domains += [domains]
 
             id_sort = np.argsort(unsorted_ids)
