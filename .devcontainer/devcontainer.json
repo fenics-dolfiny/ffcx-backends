@@ -1,0 +1,10 @@
+// See https://aka.ms/devcontainer.json.
+{
+	"name": "FFCx-backends",
+	"image": "mcr.microsoft.com/devcontainers/python:2-3.12",
+	// "features": {},
+	// "forwardPorts": [],
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y libblas-dev liblapack-dev && pip install -e .[lint,test]",
+	// "customizations": {},
+	// "remoteUser": "root"
+}
