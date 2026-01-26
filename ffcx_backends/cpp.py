@@ -113,7 +113,7 @@ class Formatter:
     @format.register
     def format_comment(self, c: L.Comment) -> str:
         """Format a comment."""
-        return f"// {c.comment }\n"
+        return f"// {c.comment}\n"
 
     @format.register
     def format_array_decl(self, arr: L.ArrayDecl) -> str:
