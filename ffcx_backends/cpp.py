@@ -113,7 +113,7 @@ class Formatter:
     @format.register
     def format_comment(self, c: L.Comment) -> str:
         """Format a comment."""
-        return "// " + c.comment + "\n"
+        return f"// {c.comment }\n"
 
     @format.register
     def format_array_decl(self, arr: L.ArrayDecl) -> str:
@@ -228,7 +228,7 @@ class Formatter:
 
     @format.register(L.Assign)
     @format.register(L.AssignAdd)
-    def format_assign(self, expr) -> str:
+    def format_assign(self, expr: L.Assign | L.AssignAdd) -> str:
         """Format an assignment statement."""
         rhs = self.format(expr.rhs)
         lhs = self.format(expr.lhs)
@@ -273,7 +273,7 @@ extern ufcx_expression {factory_name};
 
 // Helper used to create expression using name which was given to the
 // expression in the UFL file.
-// This helper is called in user c++ code.
+// This helper is called in user C++ code.
 //
 extern ufcx_expression* {name_from_uflfile};
 """
