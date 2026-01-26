@@ -11,16 +11,18 @@
                     "tamasfe.even-better-toml"
                 ],
                 "settings": {
-                    "editor.defaultFormatter": "charliermarsh.ruff",
-                    "editor.formatOnSave": true,
-                    "editor.codeActionsOnSave": {
-                        "source.organizeImports": "explicit",
-                        "source.fixAll": "explicit"
+                    "[python]": {
+                        "editor.defaultFormatter": "charliermarsh.ruff",
+                        "editor.formatOnSave": true,
+                        "editor.codeActionsOnSave": {
+                            "source.organizeImports": "explicit",
+                            "source.fixAll": "explicit"
+                        }
                     },
                     "ruff.nativeServer": true
                 }
-            }
-        },
+        }
+    },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {}
     },

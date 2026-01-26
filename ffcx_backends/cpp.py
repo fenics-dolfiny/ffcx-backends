@@ -54,8 +54,7 @@ class Formatter:
         if len(values.shape) == 1:
             return "{" + ", ".join(str(v) for v in values) + "}"
         elif len(values.shape) > 1:
-            arr += ",\n".join(Formatter.build_initializer_lists(v)
-                              for v in values)
+            arr += ",\n".join(Formatter.build_initializer_lists(v) for v in values)
         arr += "}"
         return arr
 
@@ -73,10 +72,8 @@ class Formatter:
         # add new line before section
         comments = "// ------------------------ \n"
         comments += "// Section: " + section.name + "\n"
-        comments += "// Inputs: " + \
-            ", ".join(w.name for w in section.input) + "\n"
-        comments += "// Outputs: " + \
-            ", ".join(w.name for w in section.output) + "\n"
+        comments += "// Inputs: " + ", ".join(w.name for w in section.input) + "\n"
+        comments += "// Outputs: " + ", ".join(w.name for w in section.output) + "\n"
         declarations = "".join(self.format(s) for s in section.declarations)
 
         body = ""
@@ -347,8 +344,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
     def generator(ir, options):
         """Generate UFC code for an expression."""
         logger.info("Generating code for expression:")
-        assert len(
-            ir.expression.integrand) == 1, "Expressions only support single quadrature rule"
+        assert len(ir.expression.integrand) == 1, "Expressions only support single quadrature rule"
         points = next(iter(ir.expression.integrand))[1].points
         logger.info(f"--- points: {points}")
         factory_name = ir.expression.name
@@ -374,8 +370,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
             sizes = len(ir.original_coefficient_positions)
-            values = ", ".join(str(i)
-                               for i in ir.original_coefficient_positions)
+            values = ", ".join(str(i) for i in ir.original_coefficient_positions)
             d["original_coefficient_positions_init"] = (
                 f"static int original_coefficient_positions_{factory_name}[{sizes}] = {{{values}}};"
             )
@@ -406,8 +401,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         d["num_points"] = points.shape[0]
         d["entity_dimension"] = points.shape[1]
         d["scalar_type"] = dtype_to_c_type(options["scalar_type"])
-        d["geom_type"] = dtype_to_c_type(
-            dtype_to_scalar_dtype(options["scalar_type"]))
+        d["geom_type"] = dtype_to_c_type(dtype_to_scalar_dtype(options["scalar_type"]))
         d["np_scalar_type"] = np.dtype(options["scalar_type"]).name
 
         d["rank"] = len(ir.expression.tensor_shape)
@@ -467,8 +461,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         #     d["function_spaces_init"] = ""
 
         # Check that no keys are redundant or have been missed
-        fields = [fname for _, fname, _, _ in string.Formatter().parse(
-            expression.factory) if fname]
+        fields = [fname for _, fname, _, _ in string.Formatter().parse(expression.factory) if fname]
         assert set(fields) == set(d.keys()), (
             "Mismatch between keys in template and in formatting dict"
         )
@@ -557,8 +550,7 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         code["class_type"] = ir.expression.integral_type + "_integral"
         code["name"] = ir.expression.name
 
-        vals = ", ".join(
-            "true" if i else "false" for i in ir.enabled_coefficients)
+        vals = ", ".join("true" if i else "false" for i in ir.enabled_coefficients)
         code["enabled_coefficients"] = f"{{{vals}}}"
 
         # FIXME: Get this out of code[]
@@ -644,8 +636,7 @@ class form:
         d["num_coefficients"] = ir.num_coefficients
 
         if len(ir.original_coefficient_positions) > 0:
-            values = ", ".join(str(i)
-                               for i in ir.original_coefficient_positions)
+            values = ", ".join(str(i) for i in ir.original_coefficient_positions)
             sizes = len(ir.original_coefficient_positions)
 
             d["original_coefficient_position_init"] = (
@@ -681,8 +672,7 @@ class form:
                 for i, shape in enumerate(ir.constant_shapes)
                 if len(shape) > 0
             ]
-            names = [f"constant_shapes_{ir.name}_{i}" for i in range(
-                ir.num_constants)]
+            names = [f"constant_shapes_{ir.name}_{i}" for i in range(ir.num_constants)]
             shapes1 = f"static const int* constant_shapes_{ir.name}[{ir.num_constants}] = " + "{"
             for rank, name in zip(ir.constant_ranks, names):
                 if rank > 0:
@@ -781,8 +771,7 @@ class form:
             f"int form_integral_offsets_{ir.name}[{sizes}] = {{{values}}};"
         )
 
-        fields = [fname for _, fname, _,
-                  _ in string.Formatter().parse(form.factory) if fname]
+        fields = [fname for _, fname, _, _ in string.Formatter().parse(form.factory) if fname]
         assert set(fields) == set(d.keys()), (
             "Mismatch between keys in template and in formatting dict"
         )
@@ -836,8 +825,7 @@ class file:
         extra_includes = []
         if "_Complex" in options["scalar_type"]:
             extra_includes += ["complex"]
-        d["extra_includes"] = "\n".join(
-            f"#include <{header}>" for header in extra_includes)
+        d["extra_includes"] = "\n".join(f"#include <{header}>" for header in extra_includes)
 
         code_pre = (file.declaration_pre.format_map(d),)
 

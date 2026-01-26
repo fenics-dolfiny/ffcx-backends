@@ -2,9 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tools.setuptools]
-packages = ["ffcx_backends"]
-
 [project]
 name = "ffcx_backends"
 version = "0.0.0"
@@ -33,6 +30,9 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 [project.optional-dependencies]
 lint = ["clang-format", "ruff", "yamllint"]
 test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
+
+[tool.setuptools]
+packages = ["ffcx_backends"]
 
 [tool.ruff]
 line-length = 100
