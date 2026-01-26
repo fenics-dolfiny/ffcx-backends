@@ -1,5 +1,6 @@
 """Custom C++ FFCx backend."""
 
+import functools
 import logging
 import pprint
 import string
@@ -17,6 +18,20 @@ from ffcx.codegeneration.utils import dtype_to_c_type, dtype_to_scalar_dtype
 from ffcx.ir.representation import IntegralIR
 
 logger = logging.getLogger("ffcx")
+
+
+def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, real_type: str) -> str:
+    """Map L.DataType to C++ type."""
+    if dtype == L.DataType.SCALAR:
+        return scalar_type
+    elif dtype == L.DataType.REAL:
+        return real_type
+    elif dtype == L.DataType.INT:
+        return "std::int32_t"
+    elif dtype == L.DataType.BOOL:
+        return "bool"
+    else:
+        raise ValueError(f"Invalid datatype: {dtype}")
 
 
 class Formatter:  # noqa
@@ -65,11 +80,18 @@ class Formatter:  # noqa
         self.scalar_type = "T"
         self.real_type = "U"
 
-    def format_statement_list(self, slist) -> str:
+    @functools.singledispatchmethod
+    def format(self, s) -> str:
+        """Formatting function."""
+        raise RuntimeError(f"Unknown statement: {s.__class__.__name__}")
+
+    @format.register
+    def format_statement_list(self, slist: L.StatementList) -> str:
         """Format statement list."""
         return "".join(self.format(s) for s in slist.statements)
 
-    def format_section(self, section) -> str:
+    @format.register
+    def format_section(self, section: L.Section) -> str:
         """Format a section."""
         # add new line before section
         comments = "// ------------------------ \n"
@@ -88,23 +110,18 @@ class Formatter:  # noqa
         body += "// ------------------------ \n"
         return comments + declarations + body
 
-    def format_comment(self, c) -> str:
+    @format.register
+    def format_comment(self, c: L.Comment) -> str:
         """Format a comment."""
         return "// " + c.comment + "\n"
 
-    def format_array_decl(self, arr) -> str:
+    @format.register
+    def format_array_decl(self, arr: L.ArrayDecl) -> str:
         """Format an array declaration."""
         dtype = arr.symbol.dtype
         assert dtype is not None
 
-        if dtype == L.DataType.SCALAR:
-            typename = self.scalar_type
-        elif dtype == L.DataType.REAL:
-            typename = self.real_type
-        elif dtype == L.DataType.INT:
-            typename = "int"
-        else:
-            raise ValueError("Invalid datatype")
+        typename = dtype_to_cpp_type(dtype, self.scalar_type, self.real_type)
 
         symbol = self.format(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
@@ -116,34 +133,29 @@ class Formatter:  # noqa
         cstr = "static const " if arr.const else ""
         return f"{cstr}{typename} {symbol}{dims} = {vals};\n"
 
-    def format_array_access(self, arr) -> str:
+    @format.register
+    def format_array_access(self, arr: L.ArrayAccess) -> str:
         """Format array access."""
         name = self.format(arr.array)
         indices = f"[{']['.join(self.format(i) for i in arr.indices)}]"
         return f"{name}{indices}"
 
-    def format_multi_index(self, index) -> str:
+    @format.register
+    def format_multi_index(self, index: L.MultiIndex) -> str:
         """Format a multi-index."""
         return self.format(index.global_index)
 
-    def format_variable_decl(self, v) -> str:
+    @format.register
+    def format_variable_decl(self, v: L.VariableDecl) -> str:
         """Format a variable declaration."""
         val = self.format(v.value)
         symbol = self.format(v.symbol)
         assert v.symbol.dtype
-        # TODO: move to _dtype_to_name
-        typename = ""  # tmp fix!!
-        if v.symbol.dtype == L.DataType.SCALAR:
-            typename = self.scalar_type
-        elif v.symbol.dtype == L.DataType.REAL:
-            typename = self.real_type
-        elif v.symbol.dtype == L.DataType.INT:
-            typename = "std::int32_t"
-        elif v.symbol.dtype == L.DataType.BOOL:
-            typename = "bool"
+        typename = dtype_to_cpp_type(v.symbol.dtype, self.scalar_type, self.real_type)
         return f"{typename} {symbol} = {val};\n"
 
-    def format_nary_op(self, oper) -> str:
+    @format.register
+    def format_nary_op(self, oper: L.NaryOp) -> str:
         """Format an n-argument operation."""
         # Format children
         args = [self.format(arg) for arg in oper.args]
@@ -156,7 +168,8 @@ class Formatter:  # noqa
         # Return combined string
         return f" {oper.op} ".join(args)
 
-    def format_binary_op(self, oper) -> str:
+    @format.register
+    def format_binary_op(self, oper: L.BinOp) -> str:
         """Format a binary operation."""
         # Format children
         lhs = self.format(oper.lhs)
@@ -171,25 +184,30 @@ class Formatter:  # noqa
         # Return combined string
         return f"{lhs} {oper.op} {rhs}"
 
-    def format_neg(self, val) -> str:
+    @format.register
+    def format_neg(self, val: L.Neg) -> str:
         """Format negation."""
         arg = self.format(val.arg)
         return f"-{arg}"
 
-    def format_not(self, val) -> str:
+    @format.register
+    def format_not(self, val: L.Not) -> str:
         """Format 'not' statement."""
         arg = self.format(val.arg)
         return f"{val.op}({arg})"
 
-    def format_literal_float(self, val) -> str:
+    @format.register
+    def format_literal_float(self, val: L.LiteralFloat) -> str:
         """Format a literal float number."""
         return f"{val.value}"
 
-    def format_literal_int(self, val) -> str:
+    @format.register
+    def format_literal_int(self, val: L.LiteralInt) -> str:
         """Format a literal int number."""
         return f"{val.value}"
 
-    def format_for_range(self, r) -> str:
+    @format.register
+    def format_for_range(self, r: L.ForRange) -> str:
         """Format a loop over a range."""
         begin = self.format(r.begin)
         end = self.format(r.end)
@@ -203,17 +221,21 @@ class Formatter:  # noqa
         output += "}\n"
         return output
 
-    def format_statement(self, s) -> str:
+    @format.register
+    def format_statement(self, s: L.Statement) -> str:
         """Format a statement."""
         return self.format(s.expr)
 
+    @format.register(L.Assign)
+    @format.register(L.AssignAdd)
     def format_assign(self, expr) -> str:
         """Format an assignment statement."""
         rhs = self.format(expr.rhs)
         lhs = self.format(expr.lhs)
         return f"{lhs} {expr.op} {rhs};\n"
 
-    def format_conditional(self, s) -> str:
+    @format.register
+    def format_conditional(self, s: L.Conditional) -> str:
         """Format a conditional."""
         # Format children
         c = self.format(s.condition)
@@ -231,59 +253,18 @@ class Formatter:  # noqa
         # Return combined string
         return c + " ? " + t + " : " + f
 
-    def format_symbol(self, s) -> str:
+    @format.register
+    def format_symbol(self, s: L.Symbol) -> str:
         """Format a symbol."""
         return f"{s.name}"
 
-    def format_math_function(self, c) -> str:
+    @format.register
+    def format_math_function(self, c: L.MathFunction) -> str:
         """Format a math function."""
         # Get a function from the table, if available, else just use bare name
         func = Formatter.math_table.get(c.function, c.function)
         args = ", ".join(self.format(arg) for arg in c.args)
         return f"{func}({args})"
-
-    c_impl = {
-        "Section": format_section,
-        "StatementList": format_statement_list,
-        "Comment": format_comment,
-        "ArrayDecl": format_array_decl,
-        "ArrayAccess": format_array_access,
-        "MultiIndex": format_multi_index,
-        "VariableDecl": format_variable_decl,
-        "ForRange": format_for_range,
-        "Statement": format_statement,
-        "Assign": format_assign,
-        "AssignAdd": format_assign,
-        "Product": format_nary_op,
-        "Neg": format_neg,
-        "Sum": format_nary_op,
-        "Add": format_binary_op,
-        "Sub": format_binary_op,
-        "Mul": format_binary_op,
-        "Div": format_binary_op,
-        "Not": format_not,
-        "LiteralFloat": format_literal_float,
-        "LiteralInt": format_literal_int,
-        "Symbol": format_symbol,
-        "Conditional": format_conditional,
-        "MathFunction": format_math_function,
-        "And": format_binary_op,
-        "Or": format_binary_op,
-        "NE": format_binary_op,
-        "EQ": format_binary_op,
-        "GE": format_binary_op,
-        "LE": format_binary_op,
-        "GT": format_binary_op,
-        "LT": format_binary_op,
-    }
-
-    def format(self, s) -> str:
-        """Formatting function."""
-        name = s.__class__.__name__
-        try:
-            return self.c_impl[name](self, s)
-        except KeyError:
-            raise RuntimeError("Unknown statement: ", name) from None
 
 
 class expression:  # noqa
@@ -300,12 +281,12 @@ extern ufcx_expression* {name_from_uflfile};
     factory = """
 // Code for expression {factory_name}
 
-void tabulate_tensor_{factory_name}({scalar_type}* restrict A,
-                                    const {scalar_type}* restrict w,
-                                    const {scalar_type}* restrict c,
-                                    const {geom_type}* restrict coordinate_dofs,
-                                    const int* restrict entity_local_index,
-                                    const uint8_t* restrict quadrature_permutation)
+void tabulate_tensor_{factory_name}({scalar_type}* RESTRICT A,
+                                    const {scalar_type}* RESTRICT w,
+                                    const {scalar_type}* RESTRICT c,
+                                    const {geom_type}* RESTRICT coordinate_dofs,
+                                    const int* RESTRICT entity_local_index,
+                                    const uint8_t* RESTRICT quadrature_permutation)
 {{
 {tabulate_expression}
 }}
