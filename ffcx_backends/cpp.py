@@ -9,8 +9,8 @@ import textwrap
 import basix
 import ffcx.codegeneration.lnodes as L  # noqa
 import numpy as np
-from ffcx import __version__ as FFCX_VERSION  # noqa
-from ffcx.codegeneration import __version__ as UFC_VERSION  # noqa
+from ffcx import __version__ as ffcx_version
+from ffcx.codegeneration import __version__ as ufcx_version
 from ffcx.codegeneration.backend import FFCXBackend
 from ffcx.codegeneration.expression_generator import ExpressionGenerator
 from ffcx.codegeneration.integral_generator import IntegralGenerator
@@ -34,7 +34,7 @@ def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, real_type: str) -> st
         raise ValueError(f"Invalid datatype: {dtype}")
 
 
-class Formatter:  # noqa
+class Formatter:
     math_table = {
         "sqrt": "std::sqrt",
         "abs": "std::abs",
@@ -267,7 +267,7 @@ class Formatter:  # noqa
         return f"{func}({args})"
 
 
-class expression:  # noqa
+class expression:
     declaration = """
 extern ufcx_expression {factory_name};
 
@@ -455,7 +455,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         return declaration, implementation
 
 
-class integral:  # noqa
+class integral:
     declaration = """
 class {factory_name}
 {{
@@ -553,7 +553,7 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         return (declaration + implementation,)
 
 
-class form:  # noqa
+class form:
     declaration = """
     extern ufcx_form {factory_name};
 
@@ -770,7 +770,7 @@ class form:  # noqa
         return (declaration,)
 
 
-class file:  # noqa
+class file:
     suffixes = (".hpp",)
 
     declaration_pre = """
@@ -806,7 +806,7 @@ class file:  # noqa
         logger.info("Generating code for file")
 
         # Attributes
-        d = {"ffcx_version": FFCX_VERSION, "ufcx_version": UFC_VERSION}
+        d = {"ffcx_version": ffcx_version, "ufcx_version": ufcx_version}
         d["options"] = textwrap.indent(pprint.pformat(options), "//  ")
         extra_includes = []
         if "_Complex" in options["scalar_type"]:
