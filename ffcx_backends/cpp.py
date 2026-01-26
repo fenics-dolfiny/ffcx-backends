@@ -284,7 +284,7 @@ class Formatter:
             raise RuntimeError("Unknown statement: ", name) from None
 
 
-class expression:
+class expression:  # noqa
     declaration = """
 extern ufcx_expression {factory_name};
 
@@ -364,8 +364,8 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
 
         parts = eg.generate()
 
-        CF = Formatter(options["scalar_type"])
-        d["tabulate_expression"] = CF.format(parts)
+        cf = Formatter(options["scalar_type"])
+        d["tabulate_expression"] = cf.format(parts)
 
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
@@ -472,7 +472,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         return declaration, implementation
 
 
-class integral:
+class integral:  # noqa
     declaration = """
 class {factory_name}
 {{
@@ -542,8 +542,8 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         parts = ig.generate(domain)
 
         # Format code as string
-        CF = Formatter(options["scalar_type"])
-        body = CF.format(parts)
+        cf = Formatter(options["scalar_type"])
+        body = cf.format(parts)
 
         # Generate generic FFCx code snippets and add specific parts
         code = {}
@@ -570,7 +570,7 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         return (declaration + implementation,)
 
 
-class form:
+class form:  # noqa
     declaration = """
     extern ufcx_form {factory_name};
 
@@ -674,7 +674,7 @@ class form:
             ]
             names = [f"constant_shapes_{ir.name}_{i}" for i in range(ir.num_constants)]
             shapes1 = f"static const int* constant_shapes_{ir.name}[{ir.num_constants}] = " + "{"
-            for rank, name in zip(ir.constant_ranks, names):
+            for rank, name in zip(ir.constant_ranks, names, strict=True):
                 if rank > 0:
                     shapes1 += f"{name},\n"
                 else:
@@ -727,6 +727,7 @@ class form:
                 ir.integral_names[itg_type],
                 ir.integral_domains[itg_type],
                 ir.subdomain_ids[itg_type],
+                strict=True,
             ):
                 unsorted_integrals += [f"&{name}"]
                 unsorted_ids += [id]
@@ -744,7 +745,7 @@ class form:
             values = ", ".join(
                 [
                     f"{i}_{domain.name}"
-                    for i, domains in zip(integrals, integral_domains)
+                    for i, domains in zip(integrals, integral_domains, strict=True)
                     for domain in domains
                 ]
             )
@@ -753,7 +754,9 @@ class form:
             )
             d["form_integrals"] = f"form_integrals_{ir.name}"
             values = ", ".join(
-                f"{i}" for i, domains in zip(integral_ids, integral_domains) for _ in domains
+                f"{i}"
+                for i, domains in zip(integral_ids, integral_domains, strict=True)
+                for _ in domains
             )
             d["form_integral_ids_init"] = (
                 f"int form_integral_ids_{ir.name}[{sizes}] = {{{values}}};"
@@ -784,7 +787,7 @@ class form:
         return (declaration,)
 
 
-class file:
+class file:  # noqa
     suffixes = (".hpp",)
 
     declaration_pre = """
