@@ -21,7 +21,7 @@ jobs:
       - run: pip install typos yamllint
       - run: npm install prettier prettier-plugin-toml
       - run: typos src
-      - run: yamllint .
+      - run: yamllint src
       - run: npx prettier . --check --plugin prettier-plugin-toml
 
   lint:
@@ -43,7 +43,7 @@ jobs:
 
   test:
     name: ⚙️
-    needs: [lint, compliance]
+    needs: [compliance, lint]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
