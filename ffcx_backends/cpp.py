@@ -762,12 +762,16 @@ class form:
             "Mismatch between keys in template and in formatting dict"
         )
 
+        # Format implementation code
+        # assert set(d.keys()) == template_keys(form_template.factory)
+        implementation = form.factory.format_map(d)
+
         # Format declaration
         declaration = form.declaration.format(
             factory_name=d["factory_name"], name_from_uflfile=d["name_from_uflfile"]
         )
 
-        return (declaration,)
+        return (declaration + implementation,)
 
 
 class file:
