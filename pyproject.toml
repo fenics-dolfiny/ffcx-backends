@@ -20,7 +20,7 @@ license-files = ["LICENSE"]
 # keywords = []
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python"
+  "Programming Language :: Python",
 ]
 
 [project.urls]
@@ -43,23 +43,29 @@ docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
-    "N",   # pep8-naming
-    "E",   # pycodestyle
-    "W",   # pycodestyle
-    "D",   # pydocstyle
-    "F",   # pyflakes
-    "I",   # isort
-    "RUF", # Ruff-specific rules
-    "UP",  # pyupgrade
-    "ICN", # flake8-import-conventions
-    "NPY", # numpy-specific rules
-    "FLY", # use f-string not static joins
-    "LOG", # https://docs.astral.sh/ruff/rules/#flake8-logging-log
-    "ISC", # https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
-    "B",   # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-    "A",   # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  "N",   # pep8-naming
+  "E",   # pycodestyle
+  "W",   # pycodestyle
+  "D",   # pydocstyle
+  "F",   # pyflakes
+  "I",   # isort
+  "RUF", # Ruff-specific rules
+  "UP",  # pyupgrade
+  "ICN", # flake8-import-conventions
+  "NPY", # numpy-specific rules
+  "FLY", # use f-string not static joins
+  "LOG", # flake8-logging
+  "ISC", # flake8-implicit-str-concat
+  "B",   # flake8-bugbear
+  "A",   # flake8-builtins
 ]
-ignore = ["RUF005", "RUF012", "RUF015", "D101", "N801"]
+ignore = [
+  "RUF005", # collection-literal-concatenation
+  "RUF012", # mutable-class-default
+  "RUF015", # unnecessary-iterable-allocation-for-first-element
+  "D101",   # undocumented-public-class
+  "N801",   # invalid-class-name
+]
 unfixable = ["F401"] # unused-import
 
 [tool.ruff.lint.per-file-ignores]
