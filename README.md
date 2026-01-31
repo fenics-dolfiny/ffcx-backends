@@ -24,4 +24,4 @@ This supports any [UFL](https://github.com/fenics/ufl) script compatible with cl
 ## Contributing
 
 > [!NOTE]  
-> In preparation. We are happy to include any other backend - open an issue for furhter discussion!
+> In preparation. We are happy to include any other backend - open an issue for further discussion!
