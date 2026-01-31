@@ -1,11 +1,11 @@
 # FFCx-backends
 
 > [!WARNING]
-> This project is under heavy development and is no where close to stable.
+> This project is under heavy development.
 
-*FFCx-backends* extends the FEniCS Form Compiler ([FFCx](https://github.com/fenics/ffcx)) by providing multiple other language backends as plugins.
+*FFCx-backends* extends the FEniCS Form Compiler ([FFCx](https://github.com/fenics/ffcx)) by providing other language backends as plugins.
 
-Usage through FFCx's CLI is straight forward by passing any of the supported language modules with the `--language` argument.
+Usage through FFCx's CLI is by passing any of the supported language modules with the `--language` argument.
 
 ```console
     ffcx --language ffcx-backends.[lang] form.py
