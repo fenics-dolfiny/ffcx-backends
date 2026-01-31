@@ -3,7 +3,7 @@
 > [!WARNING]
 > This project is under heavy development.
 
-*FFCx-backends* extends the FEniCS Form Compiler ([FFCx](https://github.com/fenics/ffcx)) by providing other language backends as plugins.
+_FFCx-backends_ extends the FEniCS Form Compiler ([FFCx](https://github.com/fenics/ffcx)) by providing other language backends as plugins.
 
 Usage through FFCx's CLI is by passing any of the supported language modules with the `--language` argument.
 
@@ -16,7 +16,7 @@ This supports any [UFL](https://github.com/fenics/ufl) script compatible with cl
 ## Supported backends
 
 | Language | Status             |
-| -------- | -------------------|
+| -------- | ------------------ |
 | C++      | 🛠️ experimental    |
 | CUDA     | ⏳ in development  |
 | ?        | 💡 to be suggested |
