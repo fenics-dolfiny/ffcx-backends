@@ -8,7 +8,7 @@ _FFCx-backends_ extends the FEniCS Form Compiler ([FFCx](https://github.com/feni
 Usage through FFCx's CLI is by passing any of the supported language modules with the `--language` argument.
 
 ```console
-    ffcx --language ffcx-backends.[lang] form.py
+    ffcx --language ffcx_backends.[lang] form.py
 ```
 
 This supports any [UFL](https://github.com/fenics/ufl) script compatible with classic `C` backend of FFCx.
