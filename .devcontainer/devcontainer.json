@@ -1,6 +1,10 @@
 {
   "name": "FFCx-backends",
-  "image": "mcr.microsoft.com/devcontainers/python:2-3.12",
+  "build": {
+    "dockerfile": "../docker/Dockerfile.ubuntu",
+    "context": "../",
+    "options": ["--progress", "plain"]
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -26,5 +30,5 @@
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {}
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libblas-dev liblapack-dev && pip install -e .[lint,test]"
+  "postCreateCommand": "pip install -e .[lint,test]"
 }
