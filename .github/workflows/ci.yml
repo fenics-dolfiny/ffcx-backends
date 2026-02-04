@@ -5,8 +5,27 @@ on:
     branches:
       - "main"
   pull_request:
+  schedule:
+    - cron: "0 6 * * *" # daily at 6am
 
 jobs:
+  compliance:
+    name: 🔎
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: "src"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-node@v6
+      - run: pip install typos yamllint
+      - run: npm install prettier prettier-plugin-toml
+      - run: typos src
+      - run: yamllint src
+      - run: npx prettier . --check --plugin prettier-plugin-toml
+
   lint:
     name: ✨
     runs-on: ubuntu-latest
@@ -20,25 +39,31 @@ jobs:
           cache: pip
       - run: ruff format --diff
       - run: ruff check
-      - run: yamllint .
+      - run: >
+          find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
+          xargs clang-format --dry-run --Werror
 
   test:
     name: ⚙️
-    needs: lint
+    needs: [compliance, lint]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-24.04
-          # - macos-15
-          # - windows-2025
+          - ubuntu-24.04-arm
         py:
           # - "3.10"
           # - "3.11"
           - "3.12"
           - "3.13"
-          # - "3.14"
+          - "3.14"
+        # include:
+        #   - os: macos-latest
+        #     py: "3.14"
+        #   - os: windows-latest
+        #     py: "3.14"
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install libblas-dev liblapack-dev
