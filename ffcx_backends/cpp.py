@@ -81,16 +81,16 @@ class Formatter:
         self.real_type = "U"
 
     @functools.singledispatchmethod
-    def format(self, s) -> str:
+    def __call__(self, obj: L.LNode) -> str:
         """Formatting function."""
-        raise RuntimeError(f"Unknown statement: {s.__class__.__name__}")
+        raise RuntimeError(f"Unknown statement: {obj.__class__.__name__}")
 
-    @format.register
+    @__call__.register
     def format_statement_list(self, slist: L.StatementList) -> str:
         """Format statement list."""
-        return "".join(self.format(s) for s in slist.statements)
+        return "".join(self(s) for s in slist.statements)
 
-    @format.register
+    @__call__.register
     def format_section(self, section: L.Section) -> str:
         """Format a section."""
         # add new line before section
@@ -98,24 +98,24 @@ class Formatter:
         comments += "// Section: " + section.name + "\n"
         comments += "// Inputs: " + ", ".join(w.name for w in section.input) + "\n"
         comments += "// Outputs: " + ", ".join(w.name for w in section.output) + "\n"
-        declarations = "".join(self.format(s) for s in section.declarations)
+        declarations = "".join(self(s) for s in section.declarations)
 
         body = ""
         if len(section.statements) > 0:
             declarations += "{\n  "
-            body = "".join(self.format(s) for s in section.statements)
+            body = "".join(self(s) for s in section.statements)
             body = body.replace("\n", "\n  ")
             body = body[:-2] + "}\n"
 
         body += "// ------------------------ \n"
         return comments + declarations + body
 
-    @format.register
+    @__call__.register
     def format_comment(self, c: L.Comment) -> str:
         """Format a comment."""
         return f"// {c.comment}\n"
 
-    @format.register
+    @__call__.register
     def format_array_decl(self, arr: L.ArrayDecl) -> str:
         """Format an array declaration."""
         dtype = arr.symbol.dtype
@@ -123,7 +123,7 @@ class Formatter:
 
         typename = dtype_to_cpp_type(dtype, self.scalar_type, self.real_type)
 
-        symbol = self.format(arr.symbol)
+        symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
         if arr.values is None:
             assert arr.const is False
@@ -133,32 +133,32 @@ class Formatter:
         cstr = "static const " if arr.const else ""
         return f"{cstr}{typename} {symbol}{dims} = {vals};\n"
 
-    @format.register
+    @__call__.register
     def format_array_access(self, arr: L.ArrayAccess) -> str:
         """Format array access."""
-        name = self.format(arr.array)
-        indices = f"[{']['.join(self.format(i) for i in arr.indices)}]"
+        name = self(arr.array)
+        indices = f"[{']['.join(self(i) for i in arr.indices)}]"
         return f"{name}{indices}"
 
-    @format.register
+    @__call__.register
     def format_multi_index(self, index: L.MultiIndex) -> str:
         """Format a multi-index."""
-        return self.format(index.global_index)
+        return self(index.global_index)
 
-    @format.register
+    @__call__.register
     def format_variable_decl(self, v: L.VariableDecl) -> str:
         """Format a variable declaration."""
-        val = self.format(v.value)
-        symbol = self.format(v.symbol)
+        val = self(v.value)
+        symbol = self(v.symbol)
         assert v.symbol.dtype
         typename = dtype_to_cpp_type(v.symbol.dtype, self.scalar_type, self.real_type)
         return f"{typename} {symbol} = {val};\n"
 
-    @format.register
+    @__call__.register
     def format_nary_op(self, oper: L.NaryOp) -> str:
         """Format an n-argument operation."""
         # Format children
-        args = [self.format(arg) for arg in oper.args]
+        args = [self(arg) for arg in oper.args]
 
         # Apply parentheses
         for i in range(len(args)):
@@ -168,12 +168,12 @@ class Formatter:
         # Return combined string
         return f" {oper.op} ".join(args)
 
-    @format.register
+    @__call__.register
     def format_binary_op(self, oper: L.BinOp) -> str:
         """Format a binary operation."""
         # Format children
-        lhs = self.format(oper.lhs)
-        rhs = self.format(oper.rhs)
+        lhs = self(oper.lhs)
+        rhs = self(oper.rhs)
 
         # Apply parentheses
         if oper.lhs.precedence >= oper.precedence:
@@ -184,63 +184,63 @@ class Formatter:
         # Return combined string
         return f"{lhs} {oper.op} {rhs}"
 
-    @format.register
+    @__call__.register
     def format_neg(self, val: L.Neg) -> str:
         """Format negation."""
-        arg = self.format(val.arg)
+        arg = self(val.arg)
         return f"-{arg}"
 
-    @format.register
+    @__call__.register
     def format_not(self, val: L.Not) -> str:
         """Format 'not' statement."""
-        arg = self.format(val.arg)
+        arg = self(val.arg)
         return f"{val.op}({arg})"
 
-    @format.register
+    @__call__.register
     def format_literal_float(self, val: L.LiteralFloat) -> str:
         """Format a literal float number."""
         return f"{val.value}"
 
-    @format.register
+    @__call__.register
     def format_literal_int(self, val: L.LiteralInt) -> str:
         """Format a literal int number."""
         return f"{val.value}"
 
-    @format.register
+    @__call__.register
     def format_for_range(self, r: L.ForRange) -> str:
         """Format a loop over a range."""
-        begin = self.format(r.begin)
-        end = self.format(r.end)
-        index = self.format(r.index)
+        begin = self(r.begin)
+        end = self(r.end)
+        index = self(r.index)
         output = f"for (int {index} = {begin}; {index} < {end}; ++{index})\n"
         output += "{\n"
-        body = self.format(r.body)
+        body = self(r.body)
         for line in body.split("\n"):
             if len(line) > 0:
                 output += f"  {line}\n"
         output += "}\n"
         return output
 
-    @format.register
+    @__call__.register
     def format_statement(self, s: L.Statement) -> str:
         """Format a statement."""
-        return self.format(s.expr)
+        return self(s.expr)
 
-    @format.register(L.Assign)
-    @format.register(L.AssignAdd)
+    @__call__.register(L.Assign)
+    @__call__.register(L.AssignAdd)
     def format_assign(self, expr: L.Assign | L.AssignAdd) -> str:
         """Format an assignment statement."""
-        rhs = self.format(expr.rhs)
-        lhs = self.format(expr.lhs)
+        rhs = self(expr.rhs)
+        lhs = self(expr.lhs)
         return f"{lhs} {expr.op} {rhs};\n"
 
-    @format.register
+    @__call__.register
     def format_conditional(self, s: L.Conditional) -> str:
         """Format a conditional."""
         # Format children
-        c = self.format(s.condition)
-        t = self.format(s.true)
-        f = self.format(s.false)
+        c = self(s.condition)
+        t = self(s.true)
+        f = self(s.false)
 
         # Apply parentheses
         if s.condition.precedence >= s.precedence:
@@ -253,17 +253,17 @@ class Formatter:
         # Return combined string
         return c + " ? " + t + " : " + f
 
-    @format.register
+    @__call__.register
     def format_symbol(self, s: L.Symbol) -> str:
         """Format a symbol."""
         return f"{s.name}"
 
-    @format.register
+    @__call__.register
     def format_math_function(self, c: L.MathFunction) -> str:
         """Format a math function."""
         # Get a function from the table, if available, else just use bare name
         func = Formatter.math_table.get(c.function, c.function)
-        args = ", ".join(self.format(arg) for arg in c.args)
+        args = ", ".join(self(arg) for arg in c.args)
         return f"{func}({args})"
 
 
@@ -525,8 +525,8 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         parts = ig.generate(domain)
 
         # Format code as string
-        cf = Formatter(options["scalar_type"])
-        body = cf.format(parts)
+        formatter = Formatter(options["scalar_type"])
+        body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
         code = {}
