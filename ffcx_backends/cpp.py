@@ -348,7 +348,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         parts = eg.generate()
 
         cf = Formatter(options["scalar_type"])
-        d["tabulate_expression"] = cf.format(parts)
+        d["tabulate_expression"] = cf(parts)
 
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
