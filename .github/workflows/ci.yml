@@ -74,6 +74,11 @@ jobs:
           pip-install: -e .[test]
           cache: pip
       - run: pytest -v test/
+      - working-directory: test/cpp
+        run: >
+          ctest --build-and-test . build/
+          --build-generator Ninja
+          --test-command ctest -V
 
   dev-container:
     name: 🐳
