@@ -105,3 +105,20 @@ jobs:
           -w /app
           ubuntu
           pip install -e .[lint,test]
+
+  clang-tidy:
+    name: 🐦‍🔥
+    needs: [compliance, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get install libblas-dev liblapack-dev clang-tidy
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          pip-install: -e .[test]
+          cache: pip
+      - working-directory: test/cpp
+        run: |
+          cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
+          cmake --build build

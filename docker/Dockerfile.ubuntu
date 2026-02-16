@@ -13,6 +13,8 @@ RUN apt-get update && \
         git \
         build-essential \
         cmake \
+        clang-tidy \
+        cmake-curses-gui \
         ninja-build && \
     rm -rf /var/lib/apt/lists/*
 
