@@ -526,8 +526,8 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         parts = ig.generate(domain)
 
         # Format code as string
-        format = Formatter(options["scalar_type"])  # type: ignore
-        body = format(parts)
+        formatter = Formatter(options["scalar_type"])  # type: ignore
+        body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
         code = {}
@@ -662,7 +662,7 @@ class form:
             shapes1 = (
                 f"constexpr static const int* constant_shapes_{ir.name}[{ir.num_constants}] = {{"
             )
-            for rank, name in zip(ir.constant_ranks, names):
+            for rank, name in zip(ir.constant_ranks, names, strict=True):
                 if rank > 0:
                     shapes1 += f"{name},\n"
                 else:
@@ -709,7 +709,7 @@ class form:
             values = ", ".join(
                 [
                     f"&{name}_{domain.name}"
-                    for name, domains in zip(integrals.names, integrals.domains)
+                    for name, domains in zip(integrals.names, integrals.domains, strict=True)
                     for domain in domains
                 ]
             )
@@ -718,7 +718,9 @@ class form:
             )
             d["form_integrals"] = f"form_integrals_{ir.name}"
             values = ", ".join(
-                f"{i}" for i, domains in zip(integrals.ids, integrals.domains) for _ in domains
+                f"{i}"
+                for i, domains in zip(integrals.ids, integrals.domains, strict=True)
+                for _ in domains
             )
             d["form_integral_ids_init"] = (
                 f"int form_integral_ids_{ir.name}[{sizes}] = {{{values}}};"
