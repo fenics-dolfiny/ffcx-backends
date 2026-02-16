@@ -27,8 +27,8 @@ execute_process(
 add_custom_target(
     poisson_kernel
     COMMAND
-        ffcx --language ffcx_backends.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../poisson.py -d ${CMAKE_CURRENT_BINARY_DIR}
+    ffcx --language ffcx_backends.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../poisson.py -d ${CMAKE_CURRENT_BINARY_DIR}
     VERBATIM
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../poisson.py
     COMMENT "Compile poisson.py using FFCx"
