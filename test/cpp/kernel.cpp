@@ -1,3 +1,7 @@
+#include <array>
+#include <complex>
+#include <cstddef>
+
 #include <gtest/gtest.h>
 
 #include "poisson.hpp"
@@ -33,12 +37,12 @@ TYPED_TEST(Kernel, Integral)
   integral_3af066e0aa4a1ce87756d2984331c55a2d3d2f62 integral;
 
   std::array<scalar_t, 9> A{ 0 };
-  const std::array<scalar_t, 0> w;
+  const std::array<scalar_t, 0> w{};
   const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
   integral.tabulate_tensor<scalar_t, geo_t>(
-    A.data(), w.data(), c.data(), coords.data(), 0, 0);
+    A.data(), w.data(), c.data(), coords.data(), nullptr, nullptr);
 
   const std::array<scalar_t, 9> A_expected{ 5, -2.5, -2.5, -2.5, 2.5,
                                             0, -2.5, 0,    2.5 };
