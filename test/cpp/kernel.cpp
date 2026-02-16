@@ -36,7 +36,6 @@ TYPED_TEST(Kernel, Integral)
   const std::array<scalar_t, 0> w;
   const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
-  const std::array<geo_t, 0> empty;
 
   integral.tabulate_tensor<scalar_t, geo_t>(
     A.data(), w.data(), c.data(), coords.data(), 0, 0);
