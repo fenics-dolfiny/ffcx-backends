@@ -12,10 +12,11 @@ import numpy as np
 from ffcx import __version__ as ffcx_version
 from ffcx.codegeneration import __version__ as ufcx_version
 from ffcx.codegeneration.backend import FFCXBackend
+from ffcx.codegeneration.common import integral_data, template_keys
 from ffcx.codegeneration.expression_generator import ExpressionGenerator
 from ffcx.codegeneration.integral_generator import IntegralGenerator
 from ffcx.codegeneration.utils import dtype_to_c_type, dtype_to_scalar_dtype
-from ffcx.ir.representation import IntegralIR
+from ffcx.ir.representation import FormIR, IntegralIR
 
 logger = logging.getLogger("ffcx")
 
@@ -348,7 +349,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         parts = eg.generate()
 
         cf = Formatter(options["scalar_type"])
-        d["tabulate_expression"] = cf.format(parts)
+        d["tabulate_expression"] = cf(parts)
 
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
@@ -510,12 +511,12 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         logger.info(f"--- type: {ir.expression.integral_type}")
         logger.info(f"--- name: {ir.expression.name}")
 
-        factory_name = ir.expression.name
+        factory_name = f"{ir.expression.name}_{domain.name}"
 
         # Format declaration
         declaration = integral.declaration.format(factory_name=factory_name)
 
-        # Create FFCx C backend
+        # Create FFCx backend
         backend = FFCXBackend(ir, options)
 
         # Configure kernel generator
@@ -525,8 +526,8 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         parts = ig.generate(domain)
 
         # Format code as string
-        formatter = Formatter(options["scalar_type"])
-        body = formatter(parts)
+        format = Formatter(options["scalar_type"])  # type: ignore
+        body = format(parts)
 
         # Generate generic FFCx code snippets and add specific parts
         code = {}
@@ -555,24 +556,25 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
 
 class form:
     declaration = """
-    extern ufcx_form {factory_name};
+    // extern ufcx_form {factory_name};
 
     // Helper used to create form using name which was given to the
     // form in the UFL file.
     // This helper is called in user c++ code.
     //
-    extern ufcx_form* {name_from_uflfile};
+    // extern ufcx_form* {name_from_uflfile};
 
     """
 
-    factory = """
+    factory = r"""
     // Code for form {factory_name}
 
+    struct  {factory_name} {{
     // TODO: that correct?
     {original_coefficient_position_init}
     {finite_element_hashes_init}
     {form_integral_offsets_init}
-    {form_integrals_init}
+    // {form_integrals_init}
     {form_integral_ids_init}
 
     {coefficient_names_init}
@@ -580,24 +582,25 @@ class form:
     {constant_ranks_init}
     {constant_shapes_init}
 
-    {name_from_uflfile}::signature ={signature};
-    {name_from_uflfile}::rank = {rank};
+    constexpr static const char* signature ={signature};
+    constexpr static int rank = {rank};
 
-    {name_from_uflfile}::num_coefficients = {num_coefficients};
-    {name_from_uflfile}::original_coefficient_positions = {original_coefficient_positions};
-    {name_from_uflfile}::coefficient_name_map = {coefficient_names};
+    constexpr static int num_coefficients = {num_coefficients};
+    constexpr static int* original_coefficient_positions = {original_coefficient_positions};
+    constexpr static char** coefficient_name_map = {coefficient_names};
 
-    {name_from_uflfile}::num_constants = {num_constants};
-    {name_from_uflfile}::constant_ranks = {constant_ranks};
-    {name_from_uflfile}::constant_shapes = {constant_shapes};
-    {name_from_uflfile}::constant_name_map = {constant_names};
+    constexpr static int num_constants = {num_constants};
+    constexpr static const int* constant_ranks = {constant_ranks};
+    constexpr static const int* constant_shapes = {constant_shapes};
+    constexpr static const char* constant_name_map = {constant_names};
 
-    {name_from_uflfile}::finite_element_hashes = {finite_element_hashes},
+    constexpr static const uint64_t finite_element_hashes = {finite_element_hashes},
 
     {name_from_uflfile}::form_integrals = {form_integrals};
     {name_from_uflfile}::form_integral_ids = {form_integral_ids};
     {name_from_uflfile}::form_integral_offsets = form_integral_offsets_{factory_name};
 
+    }};
     // Alias name
     using {name_from_uflfile} = {factory_name};
 
@@ -605,8 +608,8 @@ class form:
     """
 
     @staticmethod
-    def generator(ir, options):
-        """Generate UFC code for a form."""
+    def generator(ir: FormIR, options):
+        """Generate UFCx code for a form."""
         logger.info("Generating code for form:")
         logger.info(f"--- rank: {ir.rank}")
         logger.info(f"--- name: {ir.name}")
@@ -634,7 +637,7 @@ class form:
             values = ", ".join(f'"{name}"' for name in ir.coefficient_names)
             sizes = len(ir.coefficient_names)
             d["coefficient_names_init"] = (
-                f"static const char* coefficient_names_{ir.name}[{sizes}] = {{{values}}};"
+                f"constexpr static const char* coefficient_names_{ir.name}[{sizes}] = {{{values}}};"
             )
             d["coefficient_names"] = f"coefficient_names_{ir.name}"
         else:
@@ -644,20 +647,22 @@ class form:
         d["num_constants"] = ir.num_constants
         if ir.num_constants > 0:
             d["constant_ranks_init"] = (
-                f"static const int constant_ranks_{ir.name}[{ir.num_constants}] = "
+                f"constexpr static const int constant_ranks_{ir.name}[{ir.num_constants}] = "
                 f"{{{str(ir.constant_ranks)[1:-1]}}};"
             )
             d["constant_ranks"] = f"constant_ranks_{ir.name}"
 
             shapes = [
-                f"static const int constant_shapes_{ir.name}_{i}[{len(shape)}] = "
+                f"constexpr static const int constant_shapes_{ir.name}_{i}[{len(shape)}] = "
                 f"{{{str(shape)[1:-1]}}};"
                 for i, shape in enumerate(ir.constant_shapes)
                 if len(shape) > 0
             ]
             names = [f"constant_shapes_{ir.name}_{i}" for i in range(ir.num_constants)]
-            shapes1 = f"static const int* constant_shapes_{ir.name}[{ir.num_constants}] = " + "{"
-            for rank, name in zip(ir.constant_ranks, names, strict=True):
+            shapes1 = (
+                f"constexpr static const int* constant_shapes_{ir.name}[{ir.num_constants}] = {{"
+            )
+            for rank, name in zip(ir.constant_ranks, names):
                 if rank > 0:
                     shapes1 += f"{name},\n"
                 else:
@@ -677,7 +682,7 @@ class form:
             values = ", ".join(f'"{name}"' for name in ir.constant_names)
             sizes = len(ir.constant_names)
             d["constant_names_init"] = (
-                f"static const char* constant_names_{ir.name}[{sizes}] = {{{values}}};"
+                f"constexpr static const char* constant_names_{ir.name}[{sizes}] = {{{values}}};"
             )
             d["constant_names"] = f"constant_names_{ir.name}"
         else:
@@ -697,38 +702,14 @@ class form:
             d["finite_element_hashes"] = "NULL"
             d["finite_element_hashes_init"] = ""
 
-        integrals = []
-        integral_ids = []
-        integral_offsets = [0]
-        integral_domains = []
-        # Note: the order of this list is defined by the enum ufcx_integral_type in ufcx.h
-        for itg_type in ("cell", "exterior_facet", "interior_facet", "vertex", "ridge"):
-            unsorted_integrals = []
-            unsorted_ids = []
-            unsorted_domains = []
-            for name, domains, integral_id in zip(
-                ir.integral_names[itg_type],
-                ir.integral_domains[itg_type],
-                ir.subdomain_ids[itg_type],
-                strict=True,
-            ):
-                unsorted_integrals += [f"&{name}"]
-                unsorted_ids += [integral_id]
-                unsorted_domains += [domains]
+        integrals = integral_data(ir)
 
-            id_sort = np.argsort(unsorted_ids)
-            integrals += [unsorted_integrals[i] for i in id_sort]
-            integral_ids += [unsorted_ids[i] for i in id_sort]
-            integral_domains += [unsorted_domains[i] for i in id_sort]
-
-            integral_offsets.append(sum(len(d) for d in integral_domains))
-
-        if len(integrals) > 0:
-            sizes = sum(len(domains) for domains in integral_domains)
+        if len(integrals.names) > 0:
+            sizes = sum(len(domains) for domains in integrals.domains)
             values = ", ".join(
                 [
-                    f"{i}_{domain.name}"
-                    for i, domains in zip(integrals, integral_domains, strict=True)
+                    f"&{name}_{domain.name}"
+                    for name, domains in zip(integrals.names, integrals.domains)
                     for domain in domains
                 ]
             )
@@ -737,9 +718,7 @@ class form:
             )
             d["form_integrals"] = f"form_integrals_{ir.name}"
             values = ", ".join(
-                f"{i}"
-                for i, domains in zip(integral_ids, integral_domains, strict=True)
-                for _ in domains
+                f"{i}" for i, domains in zip(integrals.ids, integrals.domains) for _ in domains
             )
             d["form_integral_ids_init"] = (
                 f"int form_integral_ids_{ir.name}[{sizes}] = {{{values}}};"
@@ -751,23 +730,22 @@ class form:
             d["form_integral_ids_init"] = ""
             d["form_integral_ids"] = "NULL"
 
-        sizes = len(integral_offsets)
-        values = ", ".join(str(i) for i in integral_offsets)
+        sizes = len(integrals.offsets)
+        values = ", ".join(str(i) for i in integrals.offsets)
         d["form_integral_offsets_init"] = (
             f"int form_integral_offsets_{ir.name}[{sizes}] = {{{values}}};"
         )
 
-        fields = [fname for _, fname, _, _ in string.Formatter().parse(form.factory) if fname]
-        assert set(fields) == set(d.keys()), (
-            "Mismatch between keys in template and in formatting dict"
-        )
+        # Format implementation code
+        assert set(d.keys()) == template_keys(form.factory)
+        implementation = form.factory.format_map(d)
 
         # Format declaration
         declaration = form.declaration.format(
             factory_name=d["factory_name"], name_from_uflfile=d["name_from_uflfile"]
         )
 
-        return (declaration,)
+        return (declaration + implementation,)
 
 
 class file:
