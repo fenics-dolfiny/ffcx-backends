@@ -3,6 +3,15 @@ project(ffcx-backends-test-cpp)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_compile_options(
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Werror
+    -Wno-error=unused-parameter
+)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -11,7 +20,6 @@ FetchContent_Declare(
     GIT_TAG
         52eb8108c5bdec04579160ae17225d66034bd723 # 1.17.0
 )
-
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
