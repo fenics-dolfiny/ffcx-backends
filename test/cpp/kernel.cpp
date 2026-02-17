@@ -30,7 +30,7 @@ TYPED_TEST(Kernel, Integral)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  integral_3af066e0aa4a1ce87756d2984331c55a2d3d2f62 integral;
+  form_poisson_a::triangle_integral integral;
 
   std::array<scalar_t, 9> A{ 0 };
   const std::array<scalar_t, 0> w;
