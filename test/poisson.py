@@ -28,7 +28,6 @@ from ufl import (
     Mesh,
     TestFunction,
     TrialFunction,
-    ds,
     dx,
     grad,
     inner,
