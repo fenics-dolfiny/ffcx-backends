@@ -348,8 +348,8 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
 
         parts = eg.generate()
 
-        cf = Formatter(options["scalar_type"])
-        d["tabulate_expression"] = cf(parts)
+        formatter = Formatter(options["scalar_type"])
+        d["tabulate_expression"] = formatter(parts)
 
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
@@ -414,7 +414,9 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
             d["constant_names"] = "nullptr"
 
         # TODO: make cpp
-        d["coordinate_element_hash"] = f"UINT64_C({ir.expression.coordinate_element_hash})"
+        d["coordinate_element_hash"] = (
+            f"static_cast<std::uint64_t>({ir.expression.coordinate_element_hash})"
+        )
 
         # Check that no keys are redundant or have been missed
         fields = [fname for _, fname, _, _ in string.Formatter().parse(expression.factory) if fname]
@@ -622,11 +624,12 @@ using {name_from_uflfile} = {factory_name};
         # Finite element hashes (inline member)
         if len(ir.finite_element_hashes) > 0:
             values = ", ".join(
-                f"UINT64_C({0 if el is None else el})" for el in ir.finite_element_hashes
+                f"static_cast<std::uint64_t>({0 if el is None else el})"
+                for el in ir.finite_element_hashes
             )
             sizes = len(ir.finite_element_hashes)
             d["finite_element_hashes_member"] = (
-                f"static constexpr uint64_t finite_element_hashes[{sizes}] = {{{values}}};"
+                f"static constexpr std::uint64_t finite_element_hashes[{sizes}] = {{{values}}};"
             )
         else:
             d["finite_element_hashes_member"] = ""
