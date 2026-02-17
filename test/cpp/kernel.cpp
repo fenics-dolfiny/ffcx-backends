@@ -96,15 +96,18 @@ TYPED_TEST(Kernel, Integral)
 
   // Linear form test data
   std::array<scalar_t, 3> b{ 0 };
-  const std::array<scalar_t, 3> w_L{ 1, 1, 1 };  // Coefficient f = 1 at all nodes
-  const std::array<scalar_t, 0> c_L;  // No constants for form L
+  const std::array<scalar_t, 3> w_L{ 1,
+                                     1,
+                                     1 }; // Coefficient f = 1 at all nodes
+  const std::array<scalar_t, 0> c_L;      // No constants for form L
 
   integral_L.tabulate_tensor<scalar_t, geo_t>(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
 
-  // For f = 1 (constant), the expected result is the integral of each basis function
-  // over the reference triangle with area 1/2. Each basis function integrates to 1/6.
-  const std::array<scalar_t, 3> b_expected{ 1.0/6.0, 1.0/6.0, 1.0/6.0 };
+  // For f = 1 (constant), the expected result is the integral of each basis
+  // function over the reference triangle with area 1/2. Each basis function
+  // integrates to 1/6.
+  const std::array<scalar_t, 3> b_expected{ 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0 };
 
   for (std::size_t i = 0; i < b.size(); ++i) {
     EXPECT_SCALAR_EQ(b[i], b_expected[i]);
