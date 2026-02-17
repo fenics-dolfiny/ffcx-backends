@@ -43,6 +43,8 @@ jobs:
       - run: >
           find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
           xargs clang-format --dry-run --Werror
+      - run: mypy -p ffcx_backends
+      - run: mypy test/
 
   test:
     name: ⚙️
