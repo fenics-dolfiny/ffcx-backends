@@ -547,7 +547,7 @@ using {name_from_uflfile} = {factory_name};
 
     @staticmethod
     def generator(ir: FormIR, options):
-        """Generate UFCx code for a form."""
+        """Generate C++ code for a form."""
         logger.info("Generating code for form:")
         logger.info(f"--- rank: {ir.rank}")
         logger.info(f"--- name: {ir.name}")
