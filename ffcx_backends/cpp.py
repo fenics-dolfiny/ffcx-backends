@@ -127,7 +127,7 @@ class Formatter:
         symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
         if arr.values is None:
-            assert arr.const is False
+            assert arr.const is False  # type: ignore[unreachable]
             return f"{typename} {symbol}{dims};\n"
 
         vals = Formatter.build_initializer_lists(arr.values)
@@ -490,8 +490,6 @@ public:
             "true" if ir.expression.needs_facet_permutations else "false"
         )
 
-        # FIXME: Get this out of code[]
-        code["additional_includes_set"] = set()
         code["tabulate_tensor"] = body
 
         # Format factory with all values

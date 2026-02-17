@@ -28,7 +28,7 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 "Bug Tracker" = "https://github.com/schnellerhase/ffcx-backends/issues"
 
 [project.optional-dependencies]
-lint = ["clang-format", "ruff", "yamllint"]
+lint = ["clang-format", "ruff", "yamllint", "mypy"]
 test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
 
 [tool.setuptools]
@@ -73,3 +73,15 @@ unfixable = ["F401"] # unused-import
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.mypy]
+disallow_untyped_defs = false
+disallow_any_unimported = false
+no_implicit_optional = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unreachable = true
