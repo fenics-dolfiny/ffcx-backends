@@ -75,8 +75,8 @@ TYPED_TEST(Kernel, Integral)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  form_poisson_a::triangle_integral integral_a;
-  form_poisson_L::triangle_integral integral_L;
+  const form_poisson_a::triangle_integral integral_a;
+  const form_poisson_L::triangle_integral integral_L;
 
   // Bilinear form test data
   std::array<scalar_t, 9> A{ 0 };
@@ -99,7 +99,7 @@ TYPED_TEST(Kernel, Integral)
   const std::array<scalar_t, 3> w_L{ 1,
                                      1,
                                      1 }; // Coefficient f = 1 at all nodes
-  const std::array<scalar_t, 0> c_L;      // No constants for form L
+  const std::array<scalar_t, 0> c_L{};
 
   integral_L.tabulate_tensor<scalar_t, geo_t>(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
