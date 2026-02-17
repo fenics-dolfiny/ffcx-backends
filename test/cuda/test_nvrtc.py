@@ -1,27 +1,56 @@
-import importlib.util
-import os
-import pathlib
 import subprocess
+from pathlib import Path
+
+import pytest
+
+cuda_dir = cuda = Path(__file__).parent
+build_dir = cuda / "nvrtc_compiler" / "build"
 
 
-def test_demo_nvrtc():
-    """Test CUDA program compile with NVRTC."""
-
-    spec = importlib.util.find_spec("nvidia.cuda_nvrtc")
-    nvrtc_dir = pathlib.Path(spec.submodule_search_locations[0])
-
-    cxx = os.environ.get("CXX", "c++")
+@pytest.fixture
+def nvrtc_compiler() -> None:
+    build_dir.mkdir(exist_ok=True)
     subprocess.check_call(
         [
-            cxx,
-            f"-I{nvrtc_dir}/include",
-            f"-L{nvrtc_dir}/lib/",
-            "-o",
-            "nvrtc_test",
-            "test/cuda/main.cpp",
-            "-l:libnvrtc.so.12",
-        ]
+            "cmake",
+            "..",
+        ],
+        cwd=build_dir,
     )
+    subprocess.check_call(["make"], cwd=build_dir)
+
+
+def test_compiler_bad_source(nvrtc_compiler):
+    with pytest.raises(Exception) as error:
+        subprocess.check_call(
+            ["./nvrtc_compiler", cuda_dir / "not_a_file.cu"],
+            cwd=build_dir,
+        )
+        assert "Could not read file" in error.value
+
+
+def test_compiler_help(nvrtc_compiler) -> None:
     subprocess.check_call(
-        ["./nvrtc_test"], env={"LD_LIBRARY_PATH": f"$LD_LIBRARY_PATH:{nvrtc_dir}/lib"}
+        ["./nvrtc_compiler", "--help"],
+        cwd=build_dir,
+    )
+
+
+def test_compiler_arg_count(nvrtc_compiler) -> None:
+    with pytest.raises(Exception) as error:
+        subprocess.check_call(
+            ["./nvrtc_compiler", "a", "b"],
+            cwd=build_dir,
+        )
+        assert "Usage:" in error.value
+
+
+def test_demo_nvrtc(nvrtc_compiler):
+    cuda = Path(__file__).parent
+    build = cuda / "nvrtc_compiler" / "build"
+    source = cuda / "sample_integral.cu"
+
+    subprocess.check_call(
+        ["./nvrtc_compiler", source],
+        cwd=build,
     )
