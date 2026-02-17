@@ -1,0 +1,12 @@
+WarningsAsErrors: "*"
+UseColor: true
+Checks: >
+  *,
+  -llvmlibc*,
+  -altera-unroll-loops,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -fuchsia-default-arguments-calls,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-magic-numbers,
