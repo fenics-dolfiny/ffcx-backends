@@ -47,7 +47,7 @@ f = Coefficient(space)
 
 kappa = Constant(mesh, shape=(2, 2))
 
-a = tr(kappa) * inner(grad(u), grad(v)) * dx + inner(u, v) * dx(314) + inner(u, v) * ds(42)
+a = tr(kappa) * inner(grad(u), grad(v)) * dx
 L = f * v * dx
 
 # Expressions

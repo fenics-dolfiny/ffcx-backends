@@ -429,38 +429,28 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
 
 
 class integral:
-    declaration = """
+    factory = """
+// Code for integral {factory_name}
+
 class {factory_name}
 {{
 public:
     // Kernel
     template <typename T, typename U>
-    static void tabulate_tensor(T* A,
+    static void tabulate_tensor(T* RESTRICT A,
                                 const T* RESTRICT w,
                                 const T* RESTRICT c,
                                 const U* RESTRICT coordinate_dofs,
                                 const std::int32_t* RESTRICT entity_local_index,
-                                const std::uint8_t* RESTRICT quadrature_permutation);
+                                const std::uint8_t* RESTRICT quadrature_permutation)
+    {{
+{tabulate_tensor}
+    }}
 
     // Data
     static inline const std::vector<int> enabled_coefficients{enabled_coefficients_init};
     static constexpr bool needs_facet_permutations = {needs_facet_permutations};
 }};
-"""
-
-    factory = """
-// Code for integral {factory_name}
-
-template <typename T, typename U>
-void {factory_name}::tabulate_tensor(T* RESTRICT A,
-                                     const T* RESTRICT w,
-                                     const T* RESTRICT c,
-                                     const U* RESTRICT coordinate_dofs,
-                                     const std::int32_t* RESTRICT entity_local_index,
-                                     const std::uint8_t* RESTRICT quadrature_permutation)
-{{
-{tabulate_tensor}
-}}
 
 // End of code for integral {factory_name}
 """
@@ -502,16 +492,10 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         code["additional_includes_set"] = set()
         code["tabulate_tensor"] = body
 
-        # Format declaration with initialization values
-        declaration = integral.declaration.format(
-            factory_name=factory_name,
-            enabled_coefficients_init=code["enabled_coefficients"],
-            needs_facet_permutations=code["needs_facet_permutations"],
-        )
-
+        # Format factory with all values
         implementation = integral.factory.format(
             factory_name=factory_name,
-            enabled_coefficients=code["enabled_coefficients"],
+            enabled_coefficients_init=code["enabled_coefficients"],
             tabulate_tensor=code["tabulate_tensor"],
             needs_facet_permutations=code["needs_facet_permutations"],
             scalar_type=options["scalar_type"],
@@ -519,21 +503,10 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
             np_scalar_type=options["scalar_type"],
             coordinate_element=ir.expression.coordinate_element_hash,
         )
-        return (declaration + implementation,)
+        return (implementation,)
 
 
 class form:
-    declaration = r"""
-// extern ufcx_form {factory_name};
-
-// Helper used to create form using name which was given to the
-// form in the UFL file.
-// This helper is called in user c++ code.
-//
-// extern ufcx_form* {name_from_uflfile};
-
-"""
-
     factory = r"""
 // Code for form {factory_name}
 
@@ -705,12 +678,7 @@ using {name_from_uflfile} = {factory_name};
         assert set(d.keys()) == template_keys(form.factory)
         implementation = form.factory.format_map(d)
 
-        # Format declaration
-        declaration = form.declaration.format(
-            factory_name=d["factory_name"], name_from_uflfile=d["name_from_uflfile"]
-        )
-
-        return (declaration + implementation,)
+        return (implementation,)
 
 
 class file:
