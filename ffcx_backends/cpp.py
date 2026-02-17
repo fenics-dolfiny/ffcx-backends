@@ -414,9 +414,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
             d["constant_names"] = "nullptr"
 
         # TODO: make cpp
-        d["coordinate_element_hash"] = (
-            f"static_cast<std::uint64_t>({ir.expression.coordinate_element_hash})"
-        )
+        d["coordinate_element_hash"] = f"{ir.expression.coordinate_element_hash}ULL"
 
         # Check that no keys are redundant or have been missed
         fields = [fname for _, fname, _, _ in string.Formatter().parse(expression.factory) if fname]
@@ -621,10 +619,7 @@ using {name_from_uflfile} = {factory_name};
 
         # Finite element hashes (inline member)
         if len(ir.finite_element_hashes) > 0:
-            values = ", ".join(
-                f"static_cast<std::uint64_t>({0 if el is None else el})"
-                for el in ir.finite_element_hashes
-            )
+            values = ", ".join(f"{0 if el is None else el}ULL" for el in ir.finite_element_hashes)
             sizes = len(ir.finite_element_hashes)
             d["finite_element_hashes_member"] = (
                 f"static constexpr std::uint64_t finite_element_hashes[{sizes}] = {{{values}}};"
