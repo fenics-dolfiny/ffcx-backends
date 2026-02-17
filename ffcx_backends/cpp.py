@@ -127,7 +127,7 @@ class Formatter:
         symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
         if arr.values is None:
-            assert arr.const is False  # type: ignore[unreachable]
+            assert arr.const is False
             return f"{typename} {symbol}{dims};\n"
 
         vals = Formatter.build_initializer_lists(arr.values)
@@ -476,7 +476,7 @@ public:
         parts = ig.generate(domain)
 
         # Format code as string
-        formatter = Formatter(options["scalar_type"])  # type: ignore
+        formatter = Formatter(options["scalar_type"])
         body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
