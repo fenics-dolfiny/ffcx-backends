@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#include "pmf.hpp"
+
 #include "poisson.hpp"
 
 template<typename T>
@@ -19,14 +21,53 @@ struct real<std::complex<T>>
 };
 
 template<typename T>
+struct real<pmf<T>>
+{
+  using type = pmf<T>;
+};
+
+template<typename T>
 using real_t = real<T>::type;
 
 template<typename T>
 class Kernel : public ::testing::Test
 {};
 
-using ScalarTypes =
-  ::testing::Types<float, double, std::complex<float>, std::complex<double>>;
+void
+EXPECT_SCALAR_EQ(float a, float b)
+{
+  EXPECT_FLOAT_EQ(a, b);
+}
+
+void
+EXPECT_SCALAR_EQ(double a, double b)
+{
+  EXPECT_DOUBLE_EQ(a, b);
+}
+
+template<typename T>
+void
+EXPECT_SCALAR_EQ(const std::complex<T>& a, const std::complex<T>& b)
+{
+  EXPECT_SCALAR_EQ(std::real(a), std::real(b));
+  EXPECT_SCALAR_EQ(std::imag(a), std::imag(b));
+}
+
+template<typename T>
+void
+EXPECT_SCALAR_EQ(const pmf<T>& a, const pmf<T>& b)
+{
+  EXPECT_SCALAR_EQ(a.value(), b.value());
+}
+
+using ScalarTypes = ::testing::Types<float,
+                                     double,
+                                     std::complex<float>,
+                                     std::complex<double>,
+                                     pmf<float>,
+                                     pmf<double>,
+                                     pmf<std::complex<float>>,
+                                     pmf<std::complex<double>>>;
 TYPED_TEST_SUITE(Kernel, ScalarTypes);
 
 TYPED_TEST(Kernel, Integral)
@@ -48,11 +89,6 @@ TYPED_TEST(Kernel, Integral)
                                             0, -2.5, 0,    2.5 };
 
   for (std::size_t i = 0; i < A.size(); ++i) {
-    if constexpr (std::is_same_v<std::complex<geo_t>, scalar_t>) {
-      EXPECT_DOUBLE_EQ(std::real(A[i]), std::real(A_expected[i]));
-      EXPECT_DOUBLE_EQ(std::imag(A[i]), std::imag(A_expected[i]));
-    } else {
-      EXPECT_DOUBLE_EQ(A[i], A_expected[i]);
-    }
+    EXPECT_SCALAR_EQ(A[i], A_expected[i]);
   }
 }
