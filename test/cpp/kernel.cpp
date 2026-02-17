@@ -104,9 +104,6 @@ TYPED_TEST(Kernel, Integral)
   integral_L.tabulate_tensor<scalar_t, geo_t>(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
 
-  // For f = 1 (constant), the expected result is the integral of each basis
-  // function over the reference triangle with area 1/2. Each basis function
-  // integrates to 1/6.
   const std::array<scalar_t, 3> b_expected{ 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0 };
 
   for (std::size_t i = 0; i < b.size(); ++i) {
