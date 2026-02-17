@@ -126,7 +126,7 @@ class Formatter:
         symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
         if arr.values is None:
-            assert arr.const is False
+            assert arr.const is False  # type: ignore[unreachable]
             return f"{typename} {symbol}{dims};\n"
 
         vals = Formatter.build_initializer_lists(arr.values)
@@ -348,7 +348,7 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         parts = eg.generate()
 
         cf = Formatter(options["scalar_type"])
-        d["tabulate_expression"] = cf.format(parts)
+        d["tabulate_expression"] = cf(parts)
 
         if len(ir.original_coefficient_positions) > 0:
             d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
@@ -536,8 +536,6 @@ void {factory_name}::tabulate_tensor(T* RESTRICT A,
         vals = ", ".join("true" if i else "false" for i in ir.enabled_coefficients)
         code["enabled_coefficients"] = f"{{{vals}}}"
 
-        # FIXME: Get this out of code[]
-        code["additional_includes_set"] = set()
         code["tabulate_tensor"] = body
 
         implementation = integral.factory.format(
