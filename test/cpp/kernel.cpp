@@ -70,15 +70,13 @@ using ScalarTypes = ::testing::Types<float,
                                      pmf<std::complex<double>>>;
 TYPED_TEST_SUITE(Kernel, ScalarTypes);
 
-TYPED_TEST(Kernel, Integral)
+TYPED_TEST(Kernel, Tensor)
 {
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
   const form_poisson_a::triangle_integral integral_a;
-  const form_poisson_L::triangle_integral integral_L;
 
-  // Bilinear form test data
   std::array<scalar_t, 9> A{ 0 };
   const std::array<scalar_t, 0> w_a{};
   const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
@@ -93,13 +91,21 @@ TYPED_TEST(Kernel, Integral)
   for (std::size_t i = 0; i < A.size(); ++i) {
     EXPECT_SCALAR_EQ(A[i], A_expected[i]);
   }
+}
 
-  // Linear form test data
+TYPED_TEST(Kernel, Vector)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const form_poisson_L::triangle_integral integral_L;
+
   std::array<scalar_t, 3> b{ 0 };
   const std::array<scalar_t, 3> w_L{ 1,
                                      1,
                                      1 }; // Coefficient f = 1 at all nodes
   const std::array<scalar_t, 0> c_L{};
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
   integral_L.tabulate_tensor<scalar_t, geo_t>(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
