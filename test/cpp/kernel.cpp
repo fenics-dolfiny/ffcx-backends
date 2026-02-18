@@ -101,16 +101,16 @@ TYPED_TEST(Kernel, Vector)
   const form_poisson_L::triangle_integral integral_L;
 
   std::array<scalar_t, 3> b{ 0 };
-  const std::array<scalar_t, 3> w_L{ 1,
-                                     1,
-                                     1 }; // Coefficient f = 1 at all nodes
+  const std::array<scalar_t, 3> w_L{ 1, 2, 3 };
   const std::array<scalar_t, 0> c_L{};
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
   integral_L.tabulate_tensor<scalar_t, geo_t>(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
 
-  const std::array<scalar_t, 3> b_expected{ 1.0 / 6.0, 1.0 / 6.0, 1.0 / 6.0 };
+  const std::array<scalar_t, 3> b_expected{ 7.0 / 24.0,
+                                            8.0 / 24.0,
+                                            9.0 / 24.0 };
 
   for (std::size_t i = 0; i < b.size(); ++i) {
     EXPECT_SCALAR_EQ(b[i], b_expected[i]);
