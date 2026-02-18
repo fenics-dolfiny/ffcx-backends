@@ -18,7 +18,7 @@ add_compile_options(
     -Wextra
     -Wpedantic
     -Werror
-    -Wno-error=unused-parameter
+    -Wno-unused-parameter
 )
 
 include(FetchContent)

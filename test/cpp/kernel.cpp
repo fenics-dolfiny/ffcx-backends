@@ -70,25 +70,49 @@ using ScalarTypes = ::testing::Types<float,
                                      pmf<std::complex<double>>>;
 TYPED_TEST_SUITE(Kernel, ScalarTypes);
 
-TYPED_TEST(Kernel, Integral)
+TYPED_TEST(Kernel, Tensor)
 {
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  integral_3af066e0aa4a1ce87756d2984331c55a2d3d2f62 integral;
+  const form_poisson_a::triangle_integral integral_a;
 
   std::array<scalar_t, 9> A{ 0 };
-  const std::array<scalar_t, 0> w{};
+  const std::array<scalar_t, 0> w_a{};
   const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
-  integral.tabulate_tensor<scalar_t, geo_t>(
-    A.data(), w.data(), c.data(), coords.data(), nullptr, nullptr);
+  integral_a.tabulate_tensor<scalar_t, geo_t>(
+    A.data(), w_a.data(), c.data(), coords.data(), nullptr, nullptr);
 
   const std::array<scalar_t, 9> A_expected{ 5, -2.5, -2.5, -2.5, 2.5,
                                             0, -2.5, 0,    2.5 };
 
   for (std::size_t i = 0; i < A.size(); ++i) {
     EXPECT_SCALAR_EQ(A[i], A_expected[i]);
+  }
+}
+
+TYPED_TEST(Kernel, Vector)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const form_poisson_L::triangle_integral integral_L;
+
+  std::array<scalar_t, 3> b{ 0 };
+  const std::array<scalar_t, 3> w_L{ 1, 2, 3 };
+  const std::array<scalar_t, 0> c_L{};
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
+
+  integral_L.tabulate_tensor<scalar_t, geo_t>(
+    b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
+
+  const std::array<scalar_t, 3> b_expected{ 7.0 / 24.0,
+                                            8.0 / 24.0,
+                                            9.0 / 24.0 };
+
+  for (std::size_t i = 0; i < b.size(); ++i) {
+    EXPECT_SCALAR_EQ(b[i], b_expected[i]);
   }
 }
