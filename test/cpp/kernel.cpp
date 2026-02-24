@@ -75,7 +75,8 @@ TYPED_TEST(Kernel, Tensor)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  const typename form_poisson_a<scalar_t, geo_t>::triangle_integral integral_a;
+  const typename form_poisson_a<scalar_t, geo_t>::integral_triangle_all
+    integral_a;
 
   std::array<scalar_t, 9> A{ 0 };
   const std::array<scalar_t, 0> w_a{};
@@ -98,7 +99,8 @@ TYPED_TEST(Kernel, Vector)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  const typename form_poisson_L<scalar_t, geo_t>::triangle_integral integral_L;
+  const typename form_poisson_L<scalar_t, geo_t>::integral_triangle_all
+    integral_L;
 
   std::array<scalar_t, 3> b{ 0 };
   const std::array<scalar_t, 3> w_L{ 1, 2, 3 };
