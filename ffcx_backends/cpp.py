@@ -432,11 +432,11 @@ class integral:
     factory = """
 // Code for integral {factory_name}
 
+template <typename T, typename U>
 class {factory_name}
 {{
 public:
     // Kernel
-    template <typename T, typename U>
     static void tabulate_tensor(T* RESTRICT A,
                                 const T* RESTRICT w,
                                 const T* RESTRICT c,
@@ -445,6 +445,12 @@ public:
                                 const std::uint8_t* RESTRICT quadrature_permutation)
     {{
 {tabulate_tensor}
+    }}
+
+    // Address helper
+    static uintptr_t tabulate_tensor_addr()
+    {{
+        return reinterpret_cast<uintptr_t>(&{factory_name}::tabulate_tensor);
     }}
 
     // Data
@@ -508,6 +514,7 @@ class form:
     factory = r"""
 // Code for form {factory_name}
 
+template <typename T, typename U>
 class {factory_name}
 {{
 public:
@@ -538,7 +545,8 @@ public:
 }};
 
 // Alias name
-using {name_from_uflfile} = {factory_name};
+template <typename T, typename U>
+using {name_from_uflfile} = {factory_name}<T, U>;
 
 // End of code for form {factory_name}
 """
@@ -651,11 +659,13 @@ using {name_from_uflfile} = {factory_name};
                     class_name = f"{name}_{domain.name}"
                     # Create alias using domain name and subdomain ID
                     # Handle negative IDs (typically -1 for default/all subdomains)
-                    if ids < 0:
-                        alias_name = f"{domain.name}_integral"
+                    if ids == -1:
+                        alias_name = f"integral_{domain.name}_all"
+                    elif ids > 0:
+                        alias_name = f"integral_{domain.name}_id{ids}"
                     else:
-                        alias_name = f"{domain.name}_integral_{ids}"
-                    alias = f"using {alias_name} = {class_name};"
+                        raise ValueError(f"Invalid integral ID: {ids}")
+                    alias = f"using {alias_name} = {class_name}<T, U>;"
                     aliases.append(alias)
 
             d["integral_type_aliases"] = "\n    ".join(aliases) if aliases else "// No integrals"

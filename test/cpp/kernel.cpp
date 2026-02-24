@@ -75,14 +75,14 @@ TYPED_TEST(Kernel, Tensor)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  const form_poisson_a::triangle_integral integral_a;
+  const typename form_poisson_a<scalar_t, geo_t>::triangle_integral integral_a;
 
   std::array<scalar_t, 9> A{ 0 };
   const std::array<scalar_t, 0> w_a{};
   const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
-  integral_a.tabulate_tensor<scalar_t, geo_t>(
+  integral_a.tabulate_tensor(
     A.data(), w_a.data(), c.data(), coords.data(), nullptr, nullptr);
 
   const std::array<scalar_t, 9> A_expected{ 5, -2.5, -2.5, -2.5, 2.5,
@@ -98,14 +98,14 @@ TYPED_TEST(Kernel, Vector)
   using scalar_t = TypeParam;
   using geo_t = real_t<scalar_t>;
 
-  const form_poisson_L::triangle_integral integral_L;
+  const typename form_poisson_L<scalar_t, geo_t>::triangle_integral integral_L;
 
   std::array<scalar_t, 3> b{ 0 };
   const std::array<scalar_t, 3> w_L{ 1, 2, 3 };
   const std::array<scalar_t, 0> c_L{};
   const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
 
-  integral_L.tabulate_tensor<scalar_t, geo_t>(
+  integral_L.tabulate_tensor(
     b.data(), w_L.data(), c_L.data(), coords.data(), nullptr, nullptr);
 
   const std::array<scalar_t, 3> b_expected{ 7.0 / 24.0,
