@@ -3,24 +3,16 @@
 from __future__ import annotations
 
 import importlib
-import io
 import logging
 import os
-import re
-import sys
-import sysconfig
 import tempfile
-import time
-from contextlib import redirect_stdout
 from pathlib import Path
 
-import cffi
 import ffcx
 import ffcx.naming
 import numpy as np
 import numpy.typing as npt
 import ufl
-from ffcx.codegeneration.C.file_template import libraries as _libraries
 from ffcx.codegeneration.jit import (
     UFC_EXPRESSION_DECL,
     UFC_FORM_DECL,

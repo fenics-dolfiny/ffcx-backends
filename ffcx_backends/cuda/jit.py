@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
-import importlib
 import io
 import json
 import logging
-import os
 import sys
 import time
 from contextlib import redirect_stdout
 
 import cffi
-import ffcx
 import numpy as np
-import ufl
 from ffcx.codegeneration.C.file_template import libraries as _libraries
 
 logger = logging.getLogger("ffcx")
@@ -33,6 +29,7 @@ def compile_objects(
     cffi_libraries,
     visualise: bool = False,
 ):
+    """Specialized jit compilation routine for CUDA backend."""
     import ffcx.compiler
 
     libraries = _libraries + cffi_libraries if cffi_libraries is not None else _libraries

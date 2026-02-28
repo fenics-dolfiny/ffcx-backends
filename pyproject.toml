@@ -65,6 +65,7 @@ ignore = [
   "RUF015", # unnecessary-iterable-allocation-for-first-element
   "D101",   # undocumented-public-class
   "N801",   # invalid-class-name
+  "B006",   # mutable initializer
 ]
 unfixable = ["F401"] # unused-import
 
