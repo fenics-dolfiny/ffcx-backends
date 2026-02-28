@@ -30,7 +30,6 @@ def generator(
 
     """
     logger.info("Generating code for CUDA file")
-    print("Calling CUDA generator.")
     # Attributes
     d = {"ffcx_version": FFCX_VERSION, "ufcx_version": UFC_VERSION}
     d["options"] = textwrap.indent(pprint.pformat(options), "// ")

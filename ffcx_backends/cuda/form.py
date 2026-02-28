@@ -124,7 +124,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
         d["form_integral_ids"] = f"form_integral_ids_{ir.name}"
         values = ", ".join(
             [
-                f'"{name}_{domain.name}"'
+                f'"tabulate_tensor_{name}_{domain.name}"'
                 for name, domains in zip(integrals.names, integrals.domains)
                 for domain in domains
             ]
@@ -150,3 +150,17 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
     implementation = form_template.factory.format_map(d)
 
     return "", implementation
+
+def get_cffi_decl(names: list[str]):
+    """Get CFFI declarations for a list of forms."""
+    # we always need the cuda source
+    decl = "extern static char* cuda_source;\n"
+    extra_names = ["cuda_source"]
+    decl_template = "extern static char* form_integral_names_{name}[];\n"
+    name_template = "form_integral_names_{name}"
+
+    for name in names:
+        decl += decl_template.format(name=name)
+        extra_names.append(name_template.format(name=name))
+
+    return decl, extra_names
