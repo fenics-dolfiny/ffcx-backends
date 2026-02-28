@@ -20,10 +20,11 @@ jobs:
         with:
           python-version: "3.14"
       - uses: actions/setup-node@v6
-      - run: pip install typos yamllint
+      - run: pip install typos yamllint gersemi
       - run: npm install prettier prettier-plugin-toml
       - run: typos src
       - run: yamllint src
+      - run: gersemi --check src
       - run: npx prettier . --check --plugin prettier-plugin-toml
 
   lint:
@@ -42,6 +43,8 @@ jobs:
       - run: >
           find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
           xargs clang-format --dry-run --Werror
+      - run: mypy -p ffcx_backends
+      - run: mypy test/
 
   test:
     name: ⚙️
@@ -73,3 +76,51 @@ jobs:
           pip-install: -e .[test]
           cache: pip
       - run: pytest -v test/
+      - working-directory: test/cpp
+        run: >
+          ctest --build-and-test . build/
+          --build-generator Ninja
+          --test-command ctest -V
+
+  dev-container:
+    name: 🐳
+    needs: [compliance, lint]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - run: >
+          docker buildx build .
+          --file docker/Dockerfile.ubuntu
+          --tag ubuntu
+          --load
+      - run: >
+          docker run
+          --rm
+          -v "$PWD:/app"
+          -w /app
+          ubuntu
+          pip install -e .[lint,test]
+
+  clang-tidy:
+    name: 🐦‍🔥
+    needs: [compliance, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get install libblas-dev liblapack-dev clang-tidy
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          pip-install: -e .[test]
+          cache: pip
+      - working-directory: test/cpp
+        run: |
+          cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
+          cmake --build build

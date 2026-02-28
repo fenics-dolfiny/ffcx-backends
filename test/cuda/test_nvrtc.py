@@ -8,6 +8,8 @@ def test_demo_nvrtc():
     """Test CUDA program compile with NVRTC."""
 
     spec = importlib.util.find_spec("nvidia.cuda_nvrtc")
+    assert spec
+    assert spec.submodule_search_locations
     nvrtc_dir = pathlib.Path(spec.submodule_search_locations[0])
 
     cxx = os.environ.get("CXX", "c++")

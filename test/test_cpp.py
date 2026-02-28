@@ -11,8 +11,7 @@ def test_integral():
     u, v = ufl.TrialFunction(space), ufl.TestFunction(space)
 
     a = (ufl.inner(u, v) + ufl.inner(ufl.grad(u), ufl.grad(v))) * ufl.dx
-    opts = {"language": "ffcx_backends.cpp"}
-    opts = get_options(opts)
+    opts = get_options({"language": "ffcx_backends.cpp"})
 
     compiled_objects = compile_ufl_objects([a], opts)
 
