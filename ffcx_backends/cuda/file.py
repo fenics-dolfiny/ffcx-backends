@@ -20,7 +20,7 @@ suffixes = (".cu", "_cuda.c")
 
 def generator(
     options: dict[str, int | float | npt.DTypeLike],
-) -> tuple[tuple[str], tuple[str]]:
+) -> tuple[tuple[str, str], tuple[str, str]]:
     """Generate UFCx code for file output.
 
     Args:

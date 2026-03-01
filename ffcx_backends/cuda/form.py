@@ -11,7 +11,7 @@ from ffcx_backends.cuda import form_template
 logger = logging.getLogger("ffcx-backends")
 
 
-def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str]:
+def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str, str]:
     """Generate UFCx code for a form."""
     logger.info("Generating code for form:")
     logger.info(f"--- rank: {ir.rank}")
