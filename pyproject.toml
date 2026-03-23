@@ -28,7 +28,7 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 "Bug Tracker" = "https://github.com/schnellerhase/ffcx-backends/issues"
 
 [project.optional-dependencies]
-lint = ["clang-format", "ruff", "yamllint", "mypy"]
+lint = ["clang-format", "ruff", "yamllint", "mypy", "ty"]
 test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
 
 [tool.setuptools]

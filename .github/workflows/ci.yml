@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-          pip-install: -e .[lint]
+          pip-install: -e .[lint,test]
           cache: pip
       - run: ruff format --diff
       - run: ruff check
@@ -45,6 +45,8 @@ jobs:
           xargs clang-format --dry-run --Werror
       - run: mypy -p ffcx_backends
       - run: mypy test/
+      - run: ty check ffcx_backends/
+      - run: ty check test/
 
   test:
     name: ⚙️
