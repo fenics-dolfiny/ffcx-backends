@@ -3,19 +3,15 @@
 import functools
 import logging
 import pprint
-import string
 import textwrap
 
 import basix
 import ffcx.codegeneration.lnodes as L  # noqa
-import numpy as np
 from ffcx import __version__ as ffcx_version
-from ffcx.codegeneration import __version__ as ufcx_version
 from ffcx.codegeneration.backend import FFCXBackend
 from ffcx.codegeneration.common import integral_data, template_keys
 from ffcx.codegeneration.expression_generator import ExpressionGenerator
 from ffcx.codegeneration.integral_generator import IntegralGenerator
-from ffcx.codegeneration.utils import dtype_to_c_type, dtype_to_scalar_dtype
 from ffcx.ir.representation import FormIR, IntegralIR
 
 logger = logging.getLogger("ffcx")
@@ -269,57 +265,42 @@ class Formatter:
 
 
 class expression:
-    declaration = """
-extern ufcx_expression {factory_name};
-
-// Helper used to create expression using name which was given to the
-// expression in the UFL file.
-// This helper is called in user C++ code.
-//
-extern ufcx_expression* {name_from_uflfile};
-"""
-
     factory = """
 // Code for expression {factory_name}
 
-void tabulate_tensor_{factory_name}({scalar_type}* RESTRICT A,
-                                    const {scalar_type}* RESTRICT w,
-                                    const {scalar_type}* RESTRICT c,
-                                    const {geom_type}* RESTRICT coordinate_dofs,
-                                    const int* RESTRICT entity_local_index,
-                                    const uint8_t* RESTRICT quadrature_permutation)
+template<typename T, typename U>
+class {factory_name}
 {{
-{tabulate_expression}
-}}
+public:
+  {points}
+  {value_shape}
+  {original_coefficient_positions}
+  {coefficient_names}
+  {constant_names}
 
-{points_init}
-{value_shape_init}
-{original_coefficient_positions_init}
-{function_spaces_alloc}
-{function_spaces_init}
-{coefficient_names_init}
-{constant_names_init}
+  static constexpr int num_coefficients = {num_coefficients};
+  static constexpr int num_constants = {num_constants};
+  static constexpr int rank = {rank};
+  static constexpr int num_components = {num_components};
+  static constexpr int entity_dimension = {entity_dimension};
+  static constexpr int num_points = {num_points};
 
-
-ufcx_expression {factory_name} =
-{{
-  .tabulate_tensor_{np_scalar_type} = tabulate_tensor_{factory_name},
-  .num_coefficients = {num_coefficients},
-  .num_constants = {num_constants},
-  .original_coefficient_positions = {original_coefficient_positions},
-  .coefficient_names = {coefficient_names},
-  .constant_names = {constant_names},
-  .num_points = {num_points},
-  .entity_dimension = {entity_dimension},
-  .points = {points},
-  .value_shape = {value_shape},
-  .num_components = {num_components},
-  .rank = {rank},
-  .function_spaces = {function_spaces}
+  std::uint64_t coordinate_element_hash {{ {coordinate_element_hash}ULL }};
+  static void tabulate_tensor(T* RESTRICT A,
+                              const T* RESTRICT w,
+                              const T* RESTRICT c,
+                              const U* RESTRICT coordinate_dofs,
+                              const int* RESTRICT entity_local_index,
+                              const uint8_t* RESTRICT quadrature_permutation,
+                              void* custom_data)
+  {{
+  {tabulate_expression}
+  }}
 }};
 
 // Alias name
-ufcx_expression* {name_from_uflfile} = &{factory_name};
+template <typename T, typename U>
+using {name_from_uflfile} = {factory_name}<T, U>;
 
 // End of code for expression {factory_name}
 """
@@ -334,98 +315,69 @@ ufcx_expression* {name_from_uflfile} = &{factory_name};
         factory_name = ir.expression.name
         logger.info(f"--- name: {factory_name}")
 
-        # Format declaration
-        declaration = expression.declaration.format(
-            factory_name=factory_name, name_from_uflfile=ir.name_from_uflfile
-        )
-
         backend = FFCXBackend(ir, options)
         eg = ExpressionGenerator(ir, backend)
 
-        d = {}
+        d: dict[str, str | int] = {}
         d["name_from_uflfile"] = ir.name_from_uflfile
         d["factory_name"] = factory_name
-
         parts = eg.generate()
 
         formatter = Formatter(options["scalar_type"])
         d["tabulate_expression"] = formatter(parts)
 
         if len(ir.original_coefficient_positions) > 0:
-            d["original_coefficient_positions"] = f"original_coefficient_positions_{factory_name}"
-            sizes = len(ir.original_coefficient_positions)
             values = ", ".join(str(i) for i in ir.original_coefficient_positions)
-            d["original_coefficient_positions_init"] = (
-                f"static int original_coefficient_positions_{factory_name}[{sizes}] = {{{values}}};"
+            sizes = len(ir.original_coefficient_positions)
+            d["original_coefficient_positions"] = (
+                f"static constexpr int original_coefficient_positions[{sizes}] = {{{values}}};"
             )
-
         else:
-            d["original_coefficient_positions"] = "nullptr"
-            d["original_coefficient_positions_init"] = ""
+            d["original_coefficient_positions"] = ""
 
         values = ", ".join(str(p) for p in points.flatten())
         sizes = points.size
-        d["points_init"] = f"static double points_{factory_name}[{sizes}] = {{{values}}};"
-        d["points"] = f"points_{factory_name}"
+        d["points"] = f"static constexpr double points[{sizes}] = {{{values}}};"
 
         if len(ir.expression.shape) > 0:
             values = ", ".join(str(i) for i in ir.expression.shape)
             sizes = len(ir.expression.shape)
-            d["value_shape_init"] = (
-                f"static int value_shape_{factory_name}[{sizes}] = {{{values}}};"
-            )
-            d["value_shape"] = f"value_shape_{factory_name}"
+            d["value_shape"] = f"static constexpr int value_shape[{sizes}] = {{{values}}};"
         else:
-            d["value_shape_init"] = ""
-            d["value_shape"] = "nullptr"
-
+            d["value_shape"] = ""
         d["num_components"] = len(ir.expression.shape)
         d["num_coefficients"] = len(ir.expression.coefficient_numbering)
         d["num_constants"] = len(ir.constant_names)
         d["num_points"] = points.shape[0]
         d["entity_dimension"] = points.shape[1]
-        d["scalar_type"] = dtype_to_c_type(options["scalar_type"])
-        d["geom_type"] = dtype_to_c_type(dtype_to_scalar_dtype(options["scalar_type"]))
-        d["np_scalar_type"] = np.dtype(options["scalar_type"]).name
 
         d["rank"] = len(ir.expression.tensor_shape)
 
         if len(ir.coefficient_names) > 0:
             values = ", ".join(f'"{name}"' for name in ir.coefficient_names)
             sizes = len(ir.coefficient_names)
-            d["coefficient_names_init"] = (
-                f"static const char* coefficient_names_{factory_name}[{sizes}] = {{{values}}};"
+            d["coefficient_names"] = (
+                f"static constexpr const char* coefficient_names[{sizes}] = {{{values}}};"
             )
-
-            d["coefficient_names"] = f"coefficient_names_{factory_name}"
         else:
-            d["coefficient_names_init"] = ""
-            d["coefficient_names"] = "nullptr"
+            d["coefficient_names"] = ""
 
         if len(ir.constant_names) > 0:
             values = ", ".join(f'"{name}"' for name in ir.constant_names)
             sizes = len(ir.constant_names)
-            d["constant_names_init"] = (
-                f"static const char* constant_names_{factory_name}[{sizes}] = {{{values}}};"
+            d["constant_names"] = (
+                f"static constexpr const char* constant_names[{sizes}] = {{{values}}};"
             )
-            d["constant_names"] = f"constant_names_{factory_name}"
         else:
-            d["constant_names_init"] = ""
-            d["constant_names"] = "nullptr"
+            d["constant_names"] = ""
 
-        # TODO: make cpp
-        d["coordinate_element_hash"] = f"{ir.expression.coordinate_element_hash}ULL"
-
-        # Check that no keys are redundant or have been missed
-        fields = [fname for _, fname, _, _ in string.Formatter().parse(expression.factory) if fname]
-        assert set(fields) == set(d.keys()), (
-            "Mismatch between keys in template and in formatting dict"
-        )
+        d["coordinate_element_hash"] = f"{ir.expression.coordinate_element_hash}"
 
         # Format implementation code
+        assert set(d.keys()) == template_keys(expression.factory)
         implementation = expression.factory.format_map(d)
 
-        return declaration, implementation
+        return (implementation,)
 
 
 class integral:
@@ -691,8 +643,7 @@ class file:
     suffixes = (".hpp",)
 
     declaration_pre = """
-// This code conforms with the UFC specification version {ufcx_version}
-// and was automatically generated by FFCx version {ffcx_version}.
+// This code conforms was automatically generated by FFCx version {ffcx_version}.
 //
 // This code was generated with the following options:
 //
@@ -704,8 +655,6 @@ class file:
 #include <cstdint>
 #include <cmath>
 #include <vector>
-
-#include <ufcx.h>
 
 #if defined(_MSC_VER)
 #   define RESTRICT __restrict
@@ -723,7 +672,7 @@ class file:
         logger.info("Generating code for file")
 
         # Attributes
-        d = {"ffcx_version": ffcx_version, "ufcx_version": ufcx_version}
+        d = {"ffcx_version": ffcx_version}
         d["options"] = textwrap.indent(pprint.pformat(options), "//  ")
         extra_includes = []
         if "_Complex" in options["scalar_type"]:
