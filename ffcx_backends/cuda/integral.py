@@ -54,6 +54,8 @@ def generator(
 
     kernel_d["factory_name"] = factory_name
 
+    if options.get("disable_tabulate_tensors", False):
+        body = "return;\n"
     kernel_d["tabulate_tensor"] = body
     kernel_d["scalar_type"] = dtype_to_c_type(options["scalar_type"])  # type: ignore
     kernel_d["geom_type"] = dtype_to_c_type(dtype_to_scalar_dtype(options["scalar_type"]))  # type: ignore

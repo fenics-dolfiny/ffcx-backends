@@ -30,13 +30,13 @@ root_logger = logging.getLogger()
 
 def compile_forms(
     forms: list[ufl.Form],
-    options: dict = {},
+    options: dict | None = None,
     cache_dir: Path | None = None,
     timeout: int = 10,
-    cffi_extra_compile_args: list[str] = [],
+    cffi_extra_compile_args: list[str] | None = None,
     cffi_verbose: bool = False,
     cffi_debug: bool = False,
-    cffi_libraries: list[str] = [],
+    cffi_libraries: list[str] | None = None,
     visualise: bool = False,
 ):
     """Compile a list of UFL forms into UFCx Python objects.
@@ -52,6 +52,13 @@ def compile_forms(
         cffi_libraries: libraries to use with compiler
         visualise: Toggle visualisation
     """
+    if options is None:
+        options = {}
+    if cffi_extra_compile_args is None:
+        cffi_extra_compile_args = []
+    if cffi_libraries is None:
+        cffi_libraries = []
+
     p = ffcx.options.get_options(options)
 
     # If requested, replace bi-linear forms by their diagonal part
@@ -144,13 +151,13 @@ def compile_forms(
 
 def compile_expressions(
     expressions: list[tuple[ufl.Expr, npt.NDArray[np.floating]]],  # type: ignore
-    options: dict = {},
+    options: dict | None = None,
     cache_dir: Path | None = None,
     timeout: int = 10,
-    cffi_extra_compile_args: list[str] = [],
+    cffi_extra_compile_args: list[str] | None = None,
     cffi_verbose: bool = False,
     cffi_debug: bool = False,
-    cffi_libraries: list[str] = [],
+    cffi_libraries: list[str] | None = None,
     visualise: bool = False,
 ):
     """Compile a list of UFL expressions into UFCx Python objects.
@@ -166,6 +173,12 @@ def compile_expressions(
         cffi_libraries: libraries to use with compiler
         visualise: Toggle visualisation
     """
+    if options is None:
+        options = {}
+    if cffi_extra_compile_args is None:
+        cffi_extra_compile_args = []
+    if cffi_libraries is None:
+        cffi_libraries = []
     p = ffcx.options.get_options(options)
 
     module_name = "libffcx_expressions_" + ffcx.naming.compute_signature(
