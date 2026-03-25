@@ -118,3 +118,26 @@ TYPED_TEST(Kernel, Vector)
     EXPECT_SCALAR_EQ(b[i], b_expected[i]);
   }
 }
+
+TYPED_TEST(Kernel, Expression)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const expression_poisson_0<scalar_t, geo_t> expr;
+
+  std::array<scalar_t, 18> e{ 0 };
+  const std::array<scalar_t, 22> w{ 1, 1, 2, 2, 3, 3, 4, 4,  5,  5,  6,
+                                    6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11 };
+  const std::array<scalar_t, 4> c{ 1, 2, 3, 4 };
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 1, 0, 0, 0, 1, 0 };
+  expr.tabulate_tensor(
+    e.data(), w.data(), c.data(), coords.data(), nullptr, nullptr, nullptr);
+
+  std::array<scalar_t, 18> e_expected{ 5,  7,  8,  11, 15, 18, 14, 16, 17,
+                                       32, 36, 39, 23, 25, 26, 53, 57, 60 };
+
+  for (std::size_t i = 0; i < e.size(); ++i) {
+    EXPECT_SCALAR_EQ(e[i], e_expected[i]);
+  }
+}

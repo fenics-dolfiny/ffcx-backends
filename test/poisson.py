@@ -54,5 +54,4 @@ e_vec = basix.ufl.element("Lagrange", "triangle", 1, shape=(2, 3))
 space_vec = FunctionSpace(mesh, e_vec)
 f_vec = Coefficient(space_vec)
 
-# TODO: activate
-# expressions = [(kappa * f_vec, e_vec.basix_element.points)]
+expressions = [(kappa * f_vec, e_vec.basix_element.points)]
