@@ -26,7 +26,7 @@ def test_compiler_bad_source(nvrtc_compiler):
             ["./nvrtc_compiler", cuda_dir / "not_a_file.cu"],
             cwd=build_dir,
         )
-        assert "Could not read file" in error.value
+        assert "Could not read file" in str(error.value)
 
 
 def test_compiler_help(nvrtc_compiler) -> None:
@@ -42,7 +42,7 @@ def test_compiler_arg_count(nvrtc_compiler) -> None:
             ["./nvrtc_compiler", "a", "b"],
             cwd=build_dir,
         )
-        assert "Usage:" in error.value
+        assert "Usage:" in str(error.value)
 
 
 def test_demo_nvrtc(nvrtc_compiler):

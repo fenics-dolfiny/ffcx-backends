@@ -1,4 +1,4 @@
-import basix
+import basix.ufl
 import ufl
 from ffcx.compiler import compile_ufl_objects
 from ffcx.options import get_options
