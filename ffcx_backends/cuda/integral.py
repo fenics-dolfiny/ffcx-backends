@@ -80,7 +80,7 @@ def generator(
     metadata_d["needs_facet_permutations"] = (
         "true" if ir.expression.needs_facet_permutations else "false"
     )
-    metadata_d["domain"] = int(domain)
+    metadata_d["domain"] = str(int(domain))
 
     assert set(kernel_d.keys()) == template_keys(factory)
     assert set(metadata_d.keys()) == template_keys(metadata)

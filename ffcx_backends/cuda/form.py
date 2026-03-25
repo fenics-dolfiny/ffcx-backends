@@ -11,7 +11,7 @@ from ffcx_backends.cuda import form_template
 logger = logging.getLogger("ffcx-backends")
 
 
-def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str]:
+def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str, str]:
     """Generate UFCx code for a form."""
     logger.info("Generating code for form:")
     logger.info(f"--- rank: {ir.rank}")
@@ -119,9 +119,9 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
         )
         d["form_integrals"] = f"form_integrals_{ir.name}"
         values = ", ".join(
-            f"{i}" for i, domains in zip(
-                  integrals.ids, integrals.domains, strict=True
-                ) for _ in domains
+            f"{i}"
+            for i, domains in zip(integrals.ids, integrals.domains, strict=True)
+            for _ in domains
         )
         d["form_integral_ids_init"] = f"int form_integral_ids_{ir.name}[{sizes}] = {{{values}}};"
         d["form_integral_ids"] = f"form_integral_ids_{ir.name}"
@@ -153,6 +153,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
     implementation = form_template.factory.format_map(d)
 
     return "", implementation
+
 
 def get_cffi_decl(names: list[str]):
     """Get CFFI declarations for a list of forms."""

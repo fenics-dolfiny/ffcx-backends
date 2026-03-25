@@ -16,6 +16,7 @@ from ffcx.codegeneration.C.file_template import libraries as _libraries
 logger = logging.getLogger("ffcx")
 root_logger = logging.getLogger()
 
+
 def compile_objects(
     decl,
     ufl_objects,

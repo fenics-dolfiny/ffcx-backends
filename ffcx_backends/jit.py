@@ -28,6 +28,7 @@ from ffcx.codegeneration.jit import (
 logger = logging.getLogger("ffcx")
 root_logger = logging.getLogger()
 
+
 def compile_forms(
     forms: list[ufl.Form],
     options: dict | None = None,
@@ -94,12 +95,12 @@ def compile_forms(
     language_mod = importlib.import_module(language)
     extra_names = []
     extra_decl = ""
-    if hasattr(language_mod.form, 'get_cffi_decl'):
+    if hasattr(language_mod.form, "get_cffi_decl"):
         extra_decl, extra_names = language_mod.form.get_cffi_decl(form_names)
 
     if cache_dir is not None:
         cache_dir = Path(cache_dir)
-        obj, mod = get_cached_module(module_name, form_names+extra_names, cache_dir, timeout)
+        obj, mod = get_cached_module(module_name, form_names + extra_names, cache_dir, timeout)
         if obj is not None:
             return obj, mod, (None, None)
     else:
@@ -118,7 +119,7 @@ def compile_forms(
         decl += extra_decl
 
         # allow for custom compilation logic for a given backend
-        if hasattr(language_mod, 'compile_objects'):
+        if hasattr(language_mod, "compile_objects"):
             compile_objects = language_mod.compile_objects
         else:
             compile_objects = _compile_objects
@@ -145,7 +146,7 @@ def compile_forms(
             pass
         raise e
 
-    obj, module = _load_objects(cache_dir, module_name, form_names+extra_names)
+    obj, module = _load_objects(cache_dir, module_name, form_names + extra_names)
     return obj, module, (decl, impl)
 
 
@@ -195,12 +196,12 @@ def compile_expressions(
     language_mod = importlib.import_module(language)
     extra_names = []
     extra_decl = ""
-    if hasattr(language_mod.expression, 'get_cffi_decl'):
+    if hasattr(language_mod.expression, "get_cffi_decl"):
         extra_decl, extra_names = language_mod.expression.get_cffi_decl(expr_names)
 
     if cache_dir is not None:
         cache_dir = Path(cache_dir)
-        obj, mod = get_cached_module(module_name, expr_names+extra_names, cache_dir, timeout)
+        obj, mod = get_cached_module(module_name, expr_names + extra_names, cache_dir, timeout)
         if obj is not None:
             return obj, mod, (None, None)
     else:
@@ -218,11 +219,10 @@ def compile_expressions(
         for name in expr_names:
             decl += expression_template.format(name=name)
 
-
             decl += extra_decl
 
         # allow for custom compilation logic for a given backend
-        if hasattr(language_mod, 'compile_objects'):
+        if hasattr(language_mod, "compile_objects"):
             compile_objects = language_mod.compile_objects
         else:
             compile_objects = _compile_objects
@@ -249,5 +249,5 @@ def compile_expressions(
             pass
         raise e
 
-    obj, module = _load_objects(cache_dir, module_name, expr_names+extra_names)
+    obj, module = _load_objects(cache_dir, module_name, expr_names + extra_names)
     return obj, module, (decl, impl)
