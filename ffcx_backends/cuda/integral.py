@@ -1,4 +1,4 @@
-"""Generate UFCx code for an integral."""
+"""CUDA integral generator."""
 
 import logging
 

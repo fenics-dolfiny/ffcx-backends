@@ -1,4 +1,4 @@
-"""Template for form output."""
+"""CUDA form generator."""
 
 import logging
 

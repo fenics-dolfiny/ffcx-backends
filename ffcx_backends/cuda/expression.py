@@ -1,4 +1,4 @@
-"""Generate UFCx code for an expression."""
+"""CUDA expression generator."""
 
 import logging
 
@@ -10,4 +10,5 @@ logger = logging.getLogger("ffcx-backends")
 
 def generator(ir: ExpressionIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str, str]:
     """Generate UFCx code for an expression."""
-    return ("", "")
+    raise NotImplementedError
+    # return ("", "")

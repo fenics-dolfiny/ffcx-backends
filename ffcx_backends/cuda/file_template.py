@@ -1,4 +1,4 @@
-"""Templates for generated CUDA UFCx code."""
+"""File templates for generated CUDA code."""
 
 metadata_factory = """
 // This code conforms to the UFCx specification version {ufcx_version}

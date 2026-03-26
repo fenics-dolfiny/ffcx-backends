@@ -1,4 +1,4 @@
-"""Generate file output for CUDA."""
+"""CUDA file generator."""
 
 import logging
 import pprint
