@@ -18,7 +18,7 @@ This supports any [UFL](https://github.com/fenics/ufl) script compatible with cl
 | Language | Status             |
 | -------- | ------------------ |
 | C++      | 🛠️ experimental    |
-| CUDA     | ⏳ in development  |
+| CUDA     | 🛠️ experimental    |
 | ?        | 💡 to be suggested |
 
 ## Contributing
