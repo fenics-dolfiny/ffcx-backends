@@ -7,7 +7,7 @@ import numpy.typing as npt
 from ffcx.codegeneration.backend import FFCXBackend
 from ffcx.codegeneration.C.formatter import Formatter
 from ffcx.codegeneration.common import template_keys
-from ffcx.codegeneration.integral_generator import IntegralGenerator
+from ffcx_backends.cuda.integral_generator import IntegralGenerator
 from ffcx.codegeneration.utils import dtype_to_c_type, dtype_to_scalar_dtype
 from ffcx.ir.representation import IntegralIR
 
