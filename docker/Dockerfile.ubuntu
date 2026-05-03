@@ -21,3 +21,5 @@ RUN apt-get update && \
 RUN python -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+RUN pip install --upgrade pip
