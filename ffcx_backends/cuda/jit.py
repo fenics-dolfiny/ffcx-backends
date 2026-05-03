@@ -12,6 +12,7 @@ import tempfile
 import time
 from contextlib import redirect_stdout
 from pathlib import Path
+from typing import Any
 
 import cffi
 import ffcx
@@ -36,18 +37,18 @@ root_logger = logging.getLogger()
 
 
 def _compile_objects(
-    decl,
-    ufl_objects,
-    object_names,
-    module_name,
-    options,
-    cache_dir,
-    cffi_extra_compile_args,
-    cffi_verbose,
-    cffi_debug,
-    cffi_libraries,
+    decl: str,
+    ufl_objects: list[Any],
+    object_names: list[str],
+    module_name: str,
+    options: dict[str, int | float | npt.DTypeLike],
+    cache_dir: Path,
+    cffi_extra_compile_args: list[str],
+    cffi_verbose: bool,
+    cffi_debug: bool,
+    cffi_libraries: list[str],
     visualise: bool = False,
-):
+) -> str:
     """Specialized jit compilation routine for CUDA backend."""
     import ffcx.compiler
 
@@ -138,7 +139,7 @@ def compile_forms(
     cffi_debug: bool = False,
     cffi_libraries: list[str] | None = None,
     visualise: bool = False,
-):
+) -> tuple[Any, Any, tuple[str | None, str | None]]:
     """Compile a list of UFL forms into UFCx Python objects.
 
     Args:
@@ -253,7 +254,7 @@ def compile_expressions(
     cffi_debug: bool = False,
     cffi_libraries: list[str] | None = None,
     visualise: bool = False,
-):
+) -> tuple[Any, Any, tuple[str | None, str | None]]:
     """Compile a list of UFL expressions into UFCx Python objects.
 
     Args:

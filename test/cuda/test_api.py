@@ -3,7 +3,7 @@ from pathlib import Path
 import ffcx.main
 
 
-def test_cuda_backend():
+def test_cuda_backend() -> None:
     """Test CUDA backend."""
 
     opts = "--language ffcx_backends.cuda --scalar_type float64"

@@ -1,6 +1,6 @@
 import importlib
 
 
-def test():
+def test() -> None:
     importlib.import_module("ffcx_backends")
     assert True
