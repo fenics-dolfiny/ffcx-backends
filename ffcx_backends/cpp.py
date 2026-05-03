@@ -4,7 +4,7 @@ import functools
 import logging
 import pprint
 import textwrap
-from typing import Any
+from typing import Any, ClassVar
 
 import basix
 import ffcx.codegeneration.lnodes as L  # noqa
@@ -34,7 +34,9 @@ def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, real_type: str) -> st
 
 
 class Formatter:
-    math_table = {
+    """Format FFCx nodes into C++."""
+
+    math_table: ClassVar[dict[str, str]] = {
         "sqrt": "std::sqrt",
         "abs": "std::abs",
         "cos": "std::cos",
@@ -266,7 +268,9 @@ class Formatter:
         return f"{func}({args})"
 
 
-class expression:
+class expression:  # noqa: N801
+    """Expression generator."""
+
     factory = """
 // Code for expression {factory_name}
 
@@ -382,7 +386,9 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         return (implementation,)
 
 
-class integral:
+class integral:  # noqa: N801
+    """Integral generator."""
+
     factory = """
 // Code for integral {factory_name}
 
@@ -466,7 +472,9 @@ public:
         return (implementation,)
 
 
-class form:
+class form:  # noqa: N801
+    """Form generator."""
+
     factory = r"""
 // Code for form {factory_name}
 
@@ -643,7 +651,9 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         return (implementation,)
 
 
-class file:
+class file:  # noqa: N801
+    """File generator."""
+
     suffixes = (".hpp",)
 
     declaration_pre = """
