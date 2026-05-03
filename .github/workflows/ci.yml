@@ -70,8 +70,6 @@ jobs:
             py: "3.14"
           - os: macos-26-intel
             py: "3.14"
-        #   - os: windows-latest
-        #     py: "3.14"
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install libblas-dev liblapack-dev
