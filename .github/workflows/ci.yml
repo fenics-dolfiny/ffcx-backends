@@ -65,14 +65,19 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
-        # include:
-        #   - os: macos-latest
-        #     py: "3.14"
+        include:
+          - os: macos-26 # arm64
+            py: "3.14"
+          - os: macos-26-intel
+            py: "3.14"
         #   - os: windows-latest
         #     py: "3.14"
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install libblas-dev liblapack-dev
+        if: contains(matrix.os, 'ubuntu')
+      - run: brew install openblas lapack
+        if: contains(matrix.os, 'macos')
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py }}
