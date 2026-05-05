@@ -155,7 +155,7 @@ def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tu
     return "", implementation
 
 
-def get_cffi_decl(names: list[str]):
+def get_cffi_decl(names: list[str]) -> tuple[str, list[str]]:
     """Get CFFI declarations for a list of forms."""
     # we always need the cuda source
     decl = "extern static char* cuda_source;\n"

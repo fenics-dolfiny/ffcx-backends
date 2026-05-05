@@ -4,7 +4,7 @@ from ffcx.compiler import compile_ufl_objects
 from ffcx.options import get_options
 
 
-def test_integral():
+def test_integral() -> None:
     element = basix.ufl.element("Lagrange", "triangle", 1)
     domain = ufl.Mesh(basix.ufl.element("Lagrange", "triangle", 1, shape=(2,)))
     space = ufl.FunctionSpace(domain, element)

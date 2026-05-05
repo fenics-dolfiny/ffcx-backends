@@ -20,7 +20,7 @@ def nvrtc_compiler() -> None:
     subprocess.check_call(["make"], cwd=build_dir)
 
 
-def test_compiler_bad_source(nvrtc_compiler):
+def test_compiler_bad_source(nvrtc_compiler: None) -> None:
     with pytest.raises(Exception) as error:
         subprocess.check_call(
             ["./nvrtc_compiler", cuda_dir / "not_a_file.cu"],
@@ -29,14 +29,14 @@ def test_compiler_bad_source(nvrtc_compiler):
         assert "Could not read file" in str(error.value)
 
 
-def test_compiler_help(nvrtc_compiler) -> None:
+def test_compiler_help(nvrtc_compiler: None) -> None:
     subprocess.check_call(
         ["./nvrtc_compiler", "--help"],
         cwd=build_dir,
     )
 
 
-def test_compiler_arg_count(nvrtc_compiler) -> None:
+def test_compiler_arg_count(nvrtc_compiler: None) -> None:
     with pytest.raises(Exception) as error:
         subprocess.check_call(
             ["./nvrtc_compiler", "a", "b"],
@@ -45,7 +45,7 @@ def test_compiler_arg_count(nvrtc_compiler) -> None:
         assert "Usage:" in str(error.value)
 
 
-def test_demo_nvrtc(nvrtc_compiler):
+def test_demo_nvrtc(nvrtc_compiler: None) -> None:
     cuda = Path(__file__).parent
     build = cuda / "nvrtc_compiler" / "build"
     source = cuda / "sample_integral.cu"

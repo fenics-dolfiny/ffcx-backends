@@ -4,6 +4,7 @@ import functools
 import logging
 import pprint
 import textwrap
+from typing import Any
 
 import basix
 import ffcx.codegeneration.lnodes as L  # noqa
@@ -12,7 +13,8 @@ from ffcx.codegeneration.backend import FFCXBackend
 from ffcx.codegeneration.common import integral_data, template_keys
 from ffcx.codegeneration.expression_generator import ExpressionGenerator
 from ffcx.codegeneration.integral_generator import IntegralGenerator
-from ffcx.ir.representation import FormIR, IntegralIR
+from ffcx.ir.representation import ExpressionIR, FormIR, IntegralIR
+from numpy import typing as npt
 
 logger = logging.getLogger("ffcx")
 
@@ -62,7 +64,7 @@ class Formatter:
     }
 
     @staticmethod
-    def build_initializer_lists(values):
+    def build_initializer_lists(values: npt.NDArray) -> str:
         """Build initializer lists."""
         arr = "{"
         if len(values.shape) == 1:
@@ -72,7 +74,7 @@ class Formatter:
         arr += "}"
         return arr
 
-    def __init__(self, scalar) -> None:
+    def __init__(self, scalar: Any) -> None:
         """Initialise."""
         self.scalar_type = "T"
         self.real_type = "U"
@@ -306,7 +308,7 @@ using {name_from_uflfile} = {factory_name}<T, U>;
 """
 
     @staticmethod
-    def generator(ir, options):
+    def generator(ir: ExpressionIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str,]:
         """Generate UFC code for an expression."""
         logger.info("Generating code for expression:")
         assert len(ir.expression.integrand) == 1, "Expressions only support single quadrature rule"
@@ -414,7 +416,9 @@ public:
 """
 
     @staticmethod
-    def generator(ir: IntegralIR, domain: basix.CellType, options):
+    def generator(
+        ir: IntegralIR, domain: basix.CellType, options: dict[str, int | float | npt.DTypeLike]
+    ) -> tuple[str,]:
         """Generate C++ code for an integral."""
         logger.info("Generating code for integral:")
         logger.info(f"--- type: {ir.expression.integral_type}")
@@ -504,7 +508,7 @@ using {name_from_uflfile} = {factory_name}<T, U>;
 """
 
     @staticmethod
-    def generator(ir: FormIR, options):
+    def generator(ir: FormIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str,]:
         """Generate C++ code for a form."""
         logger.info("Generating code for form:")
         logger.info(f"--- rank: {ir.rank}")
@@ -667,7 +671,9 @@ class file:
     """
 
     @staticmethod
-    def generator(options):
+    def generator(
+        options: dict[str, str | int | float | npt.DTypeLike],
+    ) -> tuple[tuple[str,], tuple[str,]]:
         """Generate UFC code for file output."""
         logger.info("Generating code for file")
 
@@ -675,7 +681,9 @@ class file:
         d = {"ffcx_version": ffcx_version}
         d["options"] = textwrap.indent(pprint.pformat(options), "//  ")
         extra_includes = []
-        if "_Complex" in options["scalar_type"]:
+        scalar_type = options.get("scalar_type", "")
+        assert isinstance(scalar_type, str)
+        if "_Complex" in scalar_type:
             extra_includes += ["complex"]
         d["extra_includes"] = "\n".join(f"#include <{header}>" for header in extra_includes)
 
