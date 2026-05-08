@@ -11,8 +11,18 @@ dependencies = [
   "fenics-ufl@git+https://github.com/fenics/ufl@main",
 ]
 requires-python = ">=3.10"
-authors = []
-maintainers = []
+authors = [
+  # in alphabetical order
+  { name = "Andreas Zilian", email = "andreas.zilian@uni.lu" },
+  { name = "Benjamin Pachev", email = "benjaminpachev@gmail.com" },
+  { name = "Michal Habera", email = "michal.habera@uni.lu" },
+  { name = "Paul T. Kühner", email = "paul.kuehner@uni.lu" },
+]
+maintainers = [
+  # in alphabetical order
+  { name = "Michal Habera", email = "michal.habera@uni.lu" },
+  { name = "Paul T. Kühner", email = "paul.kuehner@uni.lu" },
+]
 description = ""
 readme = "README.md"
 license = "LGPL-3.0-only"
