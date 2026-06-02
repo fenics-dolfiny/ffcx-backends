@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 
+pytest.importorskip("nvidia.cuda_nvrtc", reason="NVRTC not available on all platforms.")
+
 cuda_dir = cuda = Path(__file__).parent
 build_dir = cuda / "nvrtc_compiler" / "build"
 

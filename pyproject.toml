@@ -28,7 +28,7 @@ Repository = "https://github.com/schnellerhase/ffcx-backends"
 "Bug Tracker" = "https://github.com/schnellerhase/ffcx-backends/issues"
 
 [project.optional-dependencies]
-test = ["pytest", "nvidia-cuda-nvrtc-cu12"]
+test = ["pytest", "nvidia-cuda-nvrtc-cu12 ; platform_system == 'Linux'"]
 
 [dependency-groups]
 format = ["ruff", "yamllint", "typos", "gersemi", "clang-format"]
