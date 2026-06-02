@@ -9,7 +9,7 @@ on:
     - cron: "0 6 * * *" # daily at 6am
 
 jobs:
-  compliance:
+  format:
     name: 🔎
     runs-on: ubuntu-latest
     steps:
@@ -20,12 +20,17 @@ jobs:
         with:
           python-version: "3.14"
       - uses: actions/setup-node@v6
-      - run: pip install typos yamllint gersemi
+      - run: pip install --group format
+        working-directory: src
       - run: npm install prettier prettier-plugin-toml
       - run: typos src
       - run: yamllint src
       - run: gersemi --check src
+      - run: ruff format --diff src
       - run: npx prettier . --check --plugin prettier-plugin-toml
+      - run: >
+          find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
+          xargs clang-format --dry-run --Werror
 
   lint:
     name: ✨
@@ -36,13 +41,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-          pip-install: -e .[lint,test]
+          pip-install: -e .[test] --group lint --group format
           cache: pip
-      - run: ruff format --diff
       - run: ruff check
-      - run: >
-          find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
-          xargs clang-format --dry-run --Werror
       - run: mypy -p ffcx_backends
       - run: mypy test/
       - run: ty check ffcx_backends/
@@ -50,7 +51,7 @@ jobs:
 
   test:
     name: ⚙️
-    needs: [compliance, lint]
+    needs: [format]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -86,7 +87,7 @@ jobs:
 
   dev-container:
     name: 🐳
-    needs: [compliance, lint]
+    needs: [format]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -112,7 +113,7 @@ jobs:
 
   clang-tidy:
     name: 🐦‍🔥
-    needs: [compliance, lint]
+    needs: [format]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

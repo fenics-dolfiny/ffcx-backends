@@ -40,5 +40,5 @@
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {}
   },
-  "postCreateCommand": "pip install -e .[lint,test]"
+  "postCreateCommand": "pip install --group format --group lint && pip install -e .[test]"
 }
