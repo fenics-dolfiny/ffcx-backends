@@ -593,9 +593,7 @@ class IntegralGenerator:
             # this reduces memory loads/stores, which matter A LOT
             # in CUDA kernels
             expressions = keep[indices]
-            rhs_expr = expressions[0]
-            for expression in expressions[1:]:
-                rhs_expr = L.Add(rhs_expr, expression)
+            rhs_expr = L.Sum(expressions) if len(expressions) > 1 else expressions[0]
             body.append(L.AssignAdd(A[multi_index], rhs_expr))
 
         # reverse B_indices
