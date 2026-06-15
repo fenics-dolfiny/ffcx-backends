@@ -276,19 +276,17 @@ def licm(section: L.Section, quadrature_rule: QuadratureRule) -> L.Section:
     )
 
     if outer_ops > inner_ops:
-        print(
-            f"Reversing loop order to optimize {outer_ops}"
-            f" ops instead of {inner_ops}"
-        )
-        # TODO see if there's a better way to do this
-        section.statements[0] = inner_loop
-        outer_loop.body = inner_loop.body
-        inner_loop.body = L.StatementList([outer_loop])
-    else:
-        print(
-            f"Keeping loop order to optimize {inner_ops} ops"
-            f"instead of {outer_ops}"
-        )
+        inner_loop.index, outer_loop.index = outer_loop.index, inner_loop.index
+        inner_loop.begin, outer_loop.begin = outer_loop.begin, inner_loop.begin
+        inner_loop.end, outer_loop.end = outer_loop.end, inner_loop.end
+
+    def check_hoist(candidates):
+        if len(candidates) > 1:
+            return True
+        elif len(candidates) == 1 and isinstance(candidates[0], L.Sum):
+            return True
+        else:
+            return False
 
     for r in expressions:
         hoist_candidates = []
@@ -296,7 +294,8 @@ def licm(section: L.Section, quadrature_rule: QuadratureRule) -> L.Section:
             dependency = check_dependency(arg, inner_loop.index)
             if not dependency:
                 hoist_candidates.append(arg)
-        if len(hoist_candidates) > 1:
+
+        if check_hoist(hoist_candidates):
             # create new temp
             name = f"temp_{counter}"
             counter += 1
@@ -304,17 +303,9 @@ def licm(section: L.Section, quadrature_rule: QuadratureRule) -> L.Section:
             for h in hoist_candidates:
                 r.args.remove(h)
             # update expression with new temp
-            r.args.append(L.ArrayAccess(temp, [outer_loop.index]))
-            # create code for hoisted term
-            size = outer_loop.end.value - outer_loop.begin.value
-            pre_loop.append(L.ArrayDecl(temp, size, [0]))
-            body = L.Assign(
-                L.ArrayAccess(temp, [outer_loop.index]), L.Product(hoist_candidates)
-            )
-            pre_loop.append(
-                L.ForRange(outer_loop.index, outer_loop.begin, outer_loop.end, [body])
-            )
+            r.args.append(temp)
+            pre_loop.append(L.VariableDecl(temp, value=L.Product(hoist_candidates)))
 
-    section.statements = pre_loop + section.statements
+    outer_loop.body.statements = pre_loop + outer_loop.body.statements
 
     return section
