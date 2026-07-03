@@ -208,7 +208,7 @@ def compile_forms(
 
     try:
         decl = (
-            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)  # type: ignore
+            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)
             + UFC_INTEGRAL_DECL
             + UFC_FORM_DECL
         )
@@ -303,7 +303,7 @@ def compile_expressions(
 
     try:
         decl = (
-            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)  # type: ignore
+            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)
             + UFC_INTEGRAL_DECL
             + UFC_FORM_DECL
             + UFC_EXPRESSION_DECL
