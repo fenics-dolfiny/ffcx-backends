@@ -16,6 +16,7 @@ from typing import Any
 
 import cffi
 import ffcx
+import ffcx.codegeneration
 import ffcx.naming
 import numpy as np
 import numpy.typing as npt
