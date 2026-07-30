@@ -43,6 +43,11 @@ test = ["pytest", "nvidia-cuda-nvrtc-cu12 ; platform_system == 'Linux'"]
 [dependency-groups]
 format = ["ruff", "yamllint", "typos", "gersemi", "clang-format"]
 lint = ["mypy", "ty", "ruff"]
+dev = [
+  "fenics-basix@git+https://github.com/fenics/basix@main",
+  "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
+  "fenics-ufl@git+https://github.com/fenics/ufl@main",
+]
 
 [tool.setuptools]
 packages = ["ffcx_backends"]

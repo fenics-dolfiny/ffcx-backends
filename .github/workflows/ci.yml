@@ -41,7 +41,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - run: pip install -e .[test] --group lint --group format
+      - run: >
+          pip install
+          --group lint
+          --group format
+          --group dev
+          -e .[test]
       - run: ruff check
       - run: mypy -p ffcx_backends
       - run: mypy test/
@@ -78,7 +83,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py }}
-      - run: pip install -e .[test]
+      - run: pip install -e .[test] --group dev
       - run: pytest -v test/
       - working-directory: test/cpp
         run: >
@@ -110,7 +115,7 @@ jobs:
           -v "$PWD:/app"
           -w /app
           ubuntu
-          pip install -e .[lint,test]
+          pip install --group dev -e .[lint,test]
 
   clang-tidy:
     name: 🐦‍🔥
@@ -122,7 +127,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - run: pip install -e .[test]
+      - run: pip install --group dev -e .[test]
       - working-directory: test/cpp
         run: |
           cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
