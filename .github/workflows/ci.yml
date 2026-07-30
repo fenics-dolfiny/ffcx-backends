@@ -41,8 +41,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-          pip-install: -e .[test] --group lint --group format
-          cache: pip
+      - run: pip install -e .[test] --group lint --group format
       - run: ruff check
       - run: mypy -p ffcx_backends
       - run: mypy test/
@@ -79,8 +78,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py }}
-          pip-install: -e .[test]
-          cache: pip
+      - run: pip install -e .[test]
       - run: pytest -v test/
       - working-directory: test/cpp
         run: >
@@ -124,8 +122,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-          pip-install: -e .[test]
-          cache: pip
+      - run: pip install -e .[test]
       - working-directory: test/cpp
         run: |
           cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
