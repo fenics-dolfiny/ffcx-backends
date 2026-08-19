@@ -19,18 +19,23 @@ from numpy import typing as npt
 logger = logging.getLogger("ffcx")
 
 
-def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, real_type: str) -> str:
+def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, geometry_type: str) -> str:
     """Map L.DataType to C++ type."""
     if dtype == L.DataType.SCALAR:
         return scalar_type
     elif dtype == L.DataType.REAL:
-        return real_type
+        return geometry_type
     elif dtype == L.DataType.INT:
         return "std::int32_t"
     elif dtype == L.DataType.BOOL:
         return "bool"
     else:
         raise ValueError(f"Invalid datatype: {dtype}")
+
+
+def geometry_type_name(options: dict[str, Any]) -> str:
+    """C++ template parameter the geometry-derived temporaries are emitted in."""
+    return "T" if options.get("scalar_geometry", False) else "U"
 
 
 class Formatter:
@@ -76,10 +81,16 @@ class Formatter:
         arr += "}"
         return arr
 
-    def __init__(self, scalar: Any) -> None:
-        """Initialise."""
+    def __init__(self, scalar: Any, geometry_type: str = "U") -> None:
+        """Initialise.
+
+        Args:
+            scalar: Scalar type of the element tensor.
+            geometry_type: C++ template parameter the geometry-derived temporaries are
+                emitted in, see :func:`geometry_type_name`.
+        """
         self.scalar_type = "T"
-        self.real_type = "U"
+        self.geometry_type = geometry_type
 
     @functools.singledispatchmethod
     def __call__(self, obj: L.LNode) -> str:
@@ -122,7 +133,7 @@ class Formatter:
         dtype = arr.symbol.dtype
         assert dtype is not None
 
-        typename = dtype_to_cpp_type(dtype, self.scalar_type, self.real_type)
+        typename = dtype_to_cpp_type(dtype, self.scalar_type, self.geometry_type)
 
         symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
@@ -152,7 +163,7 @@ class Formatter:
         val = self(v.value)
         symbol = self(v.symbol)
         assert v.symbol.dtype
-        typename = dtype_to_cpp_type(v.symbol.dtype, self.scalar_type, self.real_type)
+        typename = dtype_to_cpp_type(v.symbol.dtype, self.scalar_type, self.geometry_type)
         return f"{typename} {symbol} = {val};\n"
 
     @__call__.register
@@ -329,7 +340,7 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         d["factory_name"] = factory_name
         parts = eg.generate()
 
-        formatter = Formatter(options["scalar_type"])
+        formatter = Formatter(options["scalar_type"], geometry_type_name(options))
         d["tabulate_expression"] = formatter(parts)
 
         if len(ir.original_coefficient_positions) > 0:
@@ -442,7 +453,7 @@ public:
         parts = ig.generate(domain)
 
         # Format code as string
-        formatter = Formatter(options["scalar_type"])
+        formatter = Formatter(options["scalar_type"], geometry_type_name(options))
         body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
