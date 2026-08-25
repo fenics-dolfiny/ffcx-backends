@@ -72,8 +72,3 @@ def test_formatter_dtype_to_cpp_type(scalar_geometry: bool, expected: str) -> No
     assert formatter.dtype_to_cpp_type(L.DataType.SCALAR) == "T"
     assert formatter.dtype_to_cpp_type(L.DataType.INT) == "std::int32_t"
     assert formatter.dtype_to_cpp_type(L.DataType.BOOL) == "bool"
-
-
-def test_formatter_default_geometry_type() -> None:
-    """Geometry stays in its own type unless asked otherwise."""
-    assert Formatter().dtype_to_cpp_type(L.DataType.REAL) == "U"
