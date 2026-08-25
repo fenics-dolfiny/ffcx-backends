@@ -21,7 +21,6 @@ def test_integral() -> None:
     opts = get_options({"language": "ffcx_backends.cpp"})
 
     compiled_objects = compile_ufl_objects([a], opts)
-    print(compiled_objects[0][0])
 
     assert len(compiled_objects) == 2
 
