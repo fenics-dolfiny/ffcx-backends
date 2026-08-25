@@ -459,7 +459,7 @@ public:
 
         vals = ", ".join("1" if i else "0" for i in ir.enabled_coefficients)
         # Set to {0} to avoid empty array declaration
-        code["enabled_coefficients"] = f"{{{vals}}}" if vals != "" else "{{0}}"
+        code["enabled_coefficients"] = f"{{{vals}}}" if vals != "" else "{0}"
         code["needs_facet_permutations"] = (
             "true" if ir.expression.needs_facet_permutations else "false"
         )
