@@ -419,7 +419,7 @@ public:
     }}
 
     // Data
-    static inline const std::vector<int> enabled_coefficients{enabled_coefficients_init};
+    static constexpr int enabled_coefficients[] = {enabled_coefficients_init};
     static constexpr bool needs_facet_permutations = {needs_facet_permutations};
 }};
 
