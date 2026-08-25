@@ -4,7 +4,7 @@ import functools
 import logging
 import pprint
 import textwrap
-from typing import Any, ClassVar
+from typing import ClassVar
 
 import basix
 import ffcx.codegeneration.lnodes as L  # noqa
@@ -17,20 +17,6 @@ from ffcx.ir.representation import ExpressionIR, FormIR, IntegralIR
 from numpy import typing as npt
 
 logger = logging.getLogger("ffcx")
-
-
-def dtype_to_cpp_type(dtype: L.DataType, scalar_type: str, real_type: str) -> str:
-    """Map L.DataType to C++ type."""
-    if dtype == L.DataType.SCALAR:
-        return scalar_type
-    elif dtype == L.DataType.REAL:
-        return real_type
-    elif dtype == L.DataType.INT:
-        return "std::int32_t"
-    elif dtype == L.DataType.BOOL:
-        return "bool"
-    else:
-        raise ValueError(f"Invalid datatype: {dtype}")
 
 
 class Formatter:
@@ -76,10 +62,29 @@ class Formatter:
         arr += "}"
         return arr
 
-    def __init__(self, scalar: Any) -> None:
-        """Initialise."""
-        self.scalar_type = "T"
-        self.real_type = "U"
+    def __init__(self, scalar_geometry: bool = False) -> None:
+        """Initialise.
+
+        Args:
+            scalar_geometry: Force scalar type == geometry type in the kernel body.
+        """
+        self._scalar_type = "T"
+        self._geometry_type = "U"
+        if scalar_geometry:
+            self._geometry_type = self._scalar_type
+
+    def dtype_to_cpp_type(self, dtype: L.DataType) -> str:
+        """Map L.DataType to C++ type."""
+        if dtype == L.DataType.SCALAR:
+            return self._scalar_type
+        elif dtype == L.DataType.REAL:
+            return self._geometry_type
+        elif dtype == L.DataType.INT:
+            return "std::int32_t"
+        elif dtype == L.DataType.BOOL:
+            return "bool"
+        else:
+            raise ValueError(f"Invalid datatype: {dtype}")
 
     @functools.singledispatchmethod
     def __call__(self, obj: L.LNode) -> str:
@@ -122,7 +127,7 @@ class Formatter:
         dtype = arr.symbol.dtype
         assert dtype is not None
 
-        typename = dtype_to_cpp_type(dtype, self.scalar_type, self.real_type)
+        typename = self.dtype_to_cpp_type(dtype)
 
         symbol = self(arr.symbol)
         dims = "".join([f"[{i}]" for i in arr.sizes])
@@ -152,7 +157,7 @@ class Formatter:
         val = self(v.value)
         symbol = self(v.symbol)
         assert v.symbol.dtype
-        typename = dtype_to_cpp_type(v.symbol.dtype, self.scalar_type, self.real_type)
+        typename = self.dtype_to_cpp_type(v.symbol.dtype)
         return f"{typename} {symbol} = {val};\n"
 
     @__call__.register
@@ -329,7 +334,8 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         d["factory_name"] = factory_name
         parts = eg.generate()
 
-        formatter = Formatter(options["scalar_type"])
+        scalar_geometry = True if options.get("scalar_geometry") else False
+        formatter = Formatter(scalar_geometry)
         d["tabulate_expression"] = formatter(parts)
 
         if len(ir.original_coefficient_positions) > 0:
@@ -442,7 +448,8 @@ public:
         parts = ig.generate(domain)
 
         # Format code as string
-        formatter = Formatter(options["scalar_type"])
+        scalar_geometry = True if options.get("scalar_geometry") else False
+        formatter = Formatter(scalar_geometry)
         body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
