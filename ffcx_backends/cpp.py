@@ -334,7 +334,8 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         d["factory_name"] = factory_name
         parts = eg.generate()
 
-        formatter = Formatter(options.get("scalar_geometry", False))
+        scalar_geometry = True if options.get("scalar_geometry") else False
+        formatter = Formatter(scalar_geometry)
         d["tabulate_expression"] = formatter(parts)
 
         if len(ir.original_coefficient_positions) > 0:
@@ -447,7 +448,8 @@ public:
         parts = ig.generate(domain)
 
         # Format code as string
-        formatter = Formatter(options.get("scalar_geometry", False))
+        scalar_geometry = True if options.get("scalar_geometry") else False
+        formatter = Formatter(scalar_geometry)
         body = formatter(parts)
 
         # Generate generic FFCx code snippets and add specific parts
