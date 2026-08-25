@@ -6,9 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "ffcx_backends"
 version = "0.0.0"
 dependencies = [
-  "fenics-basix@git+https://github.com/fenics/basix@main",
-  "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
-  "fenics-ufl@git+https://github.com/fenics/ufl@main",
+  "fenics-basix>=0.12.0.dev0,<0.13.0",
+  "fenics-ffcx>=0.12.0.dev0,<0.13.0",
+  "fenics-ufl>=2026.2.0.dev0,<2026.3.0",
 ]
 requires-python = ">=3.10"
 authors = [
@@ -43,6 +43,11 @@ test = ["pytest", "nvidia-cuda-nvrtc-cu12 ; platform_system == 'Linux'"]
 [dependency-groups]
 format = ["ruff", "yamllint", "typos", "gersemi", "clang-format"]
 lint = ["mypy", "ty", "ruff"]
+dev = [
+  "fenics-basix@git+https://github.com/fenics/basix@main",
+  "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
+  "fenics-ufl@git+https://github.com/fenics/ufl@main",
+]
 
 [tool.setuptools]
 packages = ["ffcx_backends"]

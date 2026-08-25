@@ -16,6 +16,7 @@ from typing import Any
 
 import cffi
 import ffcx
+import ffcx.codegeneration
 import ffcx.naming
 import numpy as np
 import numpy.typing as npt
@@ -206,11 +207,12 @@ def compile_forms(
     else:
         cache_dir = Path(tempfile.mkdtemp())
 
+    scalar_type = p["scalar_type"]
+    assert isinstance(scalar_type, str)
+
     try:
         decl = (
-            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)  # type: ignore
-            + UFC_INTEGRAL_DECL
-            + UFC_FORM_DECL
+            UFC_HEADER_DECL.format(np.dtype(scalar_type).name) + UFC_INTEGRAL_DECL + UFC_FORM_DECL
         )
 
         form_template = "extern ufcx_form {name};\n"
@@ -301,9 +303,12 @@ def compile_expressions(
     else:
         cache_dir = Path(tempfile.mkdtemp())
 
+    scalar_type = p["scalar_type"]
+    assert isinstance(scalar_type, str)
+
     try:
         decl = (
-            UFC_HEADER_DECL.format(np.dtype(p["scalar_type"]).name)  # type: ignore
+            UFC_HEADER_DECL.format(np.dtype(scalar_type).name)
             + UFC_INTEGRAL_DECL
             + UFC_FORM_DECL
             + UFC_EXPRESSION_DECL
