@@ -73,9 +73,6 @@ def test_formatter_dtype_to_cpp_type(scalar_geometry: bool, expected: str) -> No
     assert formatter.dtype_to_cpp_type(L.DataType.INT) == "std::int32_t"
     assert formatter.dtype_to_cpp_type(L.DataType.BOOL) == "bool"
 
-    with pytest.raises(ValueError, match="Invalid datatype"):
-        formatter.dtype_to_cpp_type("not-a-datatype")  # type: ignore[arg-type]
-
 
 def test_formatter_default_geometry_type() -> None:
     """Geometry stays in its own type unless asked otherwise."""

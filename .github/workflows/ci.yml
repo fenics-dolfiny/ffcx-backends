@@ -41,8 +41,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-          pip-install: -e .[test] --group lint --group format
-          cache: pip
+      - run: >
+          pip install
+          --group lint
+          --group format
+          --group dev
+          -e .[test]
       - run: ruff check
       - run: mypy -p ffcx_backends
       - run: mypy test/
@@ -79,8 +83,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.py }}
-          pip-install: -e .[test]
-          cache: pip
+      - run: pip install -e .[test] --group dev
       - run: pytest -v test/
       - working-directory: test/cpp
         run: >
@@ -100,7 +103,7 @@ jobs:
           - ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v5
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - run: >
           docker buildx build .
           --file docker/Dockerfile.ubuntu
@@ -112,7 +115,7 @@ jobs:
           -v "$PWD:/app"
           -w /app
           ubuntu
-          pip install -e .[lint,test]
+          pip install --group dev -e .[lint,test]
 
   clang-tidy:
     name: 🐦‍🔥
@@ -124,8 +127,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-          pip-install: -e .[test]
-          cache: pip
+      - run: pip install --group dev -e .[test]
       - working-directory: test/cpp
         run: |
           cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
