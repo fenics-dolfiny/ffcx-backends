@@ -71,5 +71,3 @@ def test_formatter_dtype_to_cpp_type(scalar_geometry: bool, expected: str) -> No
     assert formatter.dtype_to_cpp_type(L.DataType.SCALAR) == "T"
     assert formatter.dtype_to_cpp_type(L.DataType.INT) == "std::int32_t"
     assert formatter.dtype_to_cpp_type(L.DataType.BOOL) == "bool"
-
-
