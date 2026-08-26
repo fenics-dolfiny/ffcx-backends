@@ -420,7 +420,8 @@ public:
     }}
 
     // Data
-    static constexpr std::array enabled_coefficients = {enabled_coefficients_init};
+    static constexpr std::array<int, {num_enabled_coefficients}>
+        enabled_coefficients = {enabled_coefficients_init};
     static constexpr bool needs_facet_permutations = {needs_facet_permutations};
 }};
 
@@ -458,8 +459,8 @@ public:
         code["name"] = ir.expression.name
 
         vals = ", ".join("1" if i else "0" for i in ir.enabled_coefficients)
-        # Set to {0} to avoid empty array declaration
-        code["enabled_coefficients"] = f"{{{vals}}}" if vals != "" else "{0}"
+        code["num_enabled_coefficients"] = len(ir.enabled_coefficients)
+        code["enabled_coefficients"] = f"{{{vals}}}"
         code["needs_facet_permutations"] = (
             "true" if ir.expression.needs_facet_permutations else "false"
         )
@@ -470,6 +471,7 @@ public:
         implementation = integral.factory.format(
             factory_name=factory_name,
             enabled_coefficients_init=code["enabled_coefficients"],
+            num_enabled_coefficients=code["num_enabled_coefficients"],
             tabulate_tensor=code["tabulate_tensor"],
             needs_facet_permutations=code["needs_facet_permutations"],
             scalar_type=options["scalar_type"],
