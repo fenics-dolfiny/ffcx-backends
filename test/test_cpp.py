@@ -15,8 +15,9 @@ def test_integral() -> None:
     domain = ufl.Mesh(basix.ufl.element("Lagrange", "triangle", 1, shape=(2,)))
     space = ufl.FunctionSpace(domain, element)
     u, v = ufl.TrialFunction(space), ufl.TestFunction(space)
+    f = ufl.Coefficient(space)
 
-    a = (ufl.inner(u, v) + ufl.inner(ufl.grad(u), ufl.grad(v))) * ufl.dx
+    a = (ufl.inner(u, v) + f * ufl.inner(ufl.grad(u), ufl.grad(v))) * ufl.dx
     opts = get_options({"language": "ffcx_backends.cpp"})
 
     compiled_objects = compile_ufl_objects([a], opts)
