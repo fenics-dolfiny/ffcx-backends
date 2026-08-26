@@ -459,7 +459,7 @@ public:
         code["name"] = ir.expression.name
 
         vals = ", ".join("1" if i else "0" for i in ir.enabled_coefficients)
-        code["num_enabled_coefficients"] = len(ir.enabled_coefficients)
+        code["num_enabled_coefficients"] = str(len(ir.enabled_coefficients))
         code["enabled_coefficients"] = f"{{{vals}}}"
         code["needs_facet_permutations"] = (
             "true" if ir.expression.needs_facet_permutations else "false"
