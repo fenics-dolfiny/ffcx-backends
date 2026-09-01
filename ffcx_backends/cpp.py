@@ -154,10 +154,12 @@ class Formatter:
     @__call__.register
     def format_variable_decl(self, v: L.VariableDecl) -> str:
         """Format a variable declaration."""
-        val = self(v.value)
         symbol = self(v.symbol)
         assert v.symbol.dtype
         typename = self.dtype_to_cpp_type(v.symbol.dtype)
+        if v.value is None:
+            return f"{typename} {symbol};\n"
+        val = self(v.value)
         return f"{typename} {symbol} = {val};\n"
 
     @__call__.register
