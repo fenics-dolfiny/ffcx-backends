@@ -137,6 +137,12 @@ class Formatter:
 
         vals = Formatter.build_initializer_lists(arr.values)
         cstr = "static const " if arr.const else ""
+
+        # use std::array for one dimensional data
+        if len(arr.sizes) == 1:
+            dim = arr.sizes[0]
+            return f"{cstr}std::array<{typename}, {dim}> {symbol} = {vals};\n"
+
         return f"{cstr}{typename} {symbol}{dims} = {vals};\n"
 
     @__call__.register
