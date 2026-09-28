@@ -27,8 +27,9 @@ jobs:
       - run: yamllint src
       - run: gersemi --check src
       - run: ruff format --diff src
-      - run: >
-          npx prettier . --list-different --plugin prettier-plugin-toml
+      - run: |
+          npx prettier . --write --plugin prettier-plugin-toml
+          git diff --exit-code
       - run: >
           find . -type f \( -name "*.cpp" -o -name "*.cu" \) |
           xargs clang-format --dry-run --Werror
