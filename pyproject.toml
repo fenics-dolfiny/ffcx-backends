@@ -50,7 +50,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["ffcx_backends"]
+packages = ["ffcx_backends", "ffcx_backends.cuda"]
 
 [tool.ruff]
 line-length = 100
