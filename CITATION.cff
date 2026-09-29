@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it."
+type: software
+title: "FFCx-backends"
+version: "0.1.0"
+authors:
+  - family-names: "Kühner"
+    given-names: "Paul, T."
+    orcid: https://orcid.org/0009-0007-4200-0366
+  - family-names: "Habera"
+    given-names: "Michal"
+    orcid: https://orcid.org/0000-0003-0604-8884
+  - family-names: "Pachev"
+    given-names: "Benjamin"
+    orcid: https://orcid.org/0000-0002-9067-0491
+  - family-names: "Andreas"
+    given-names: "Zilian"
+    orcid: https://orcid.org/0000-0002-4228-4465
