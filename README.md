@@ -1,5 +1,9 @@
 # FFCx-backends
 
+[![DOI](https://zenodo.org/badge/1128445944.svg)](https://doi.org/10.5281/zenodo.23034915)
+
+---
+
 > [!WARNING]
 > This project is under heavy development.
 
