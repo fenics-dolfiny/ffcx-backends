@@ -133,10 +133,26 @@ jobs:
           cmake -S . -B build -DENABLE_CLANG_TIDY=ON -GNinja
           cmake --build build
 
+  wheel:
+    name: 🎡
+    needs: [format]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install build
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist/
+
   status-check:
     name: ☑️
     if: always()
-    needs: [format, lint, test, dev-container, clang-tidy]
+    needs: [format, lint, test, dev-container, clang-tidy, wheel]
     runs-on: ubuntu-latest
     steps:
       - if: >-
