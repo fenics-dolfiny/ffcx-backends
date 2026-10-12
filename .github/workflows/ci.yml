@@ -18,7 +18,7 @@ jobs:
           path: "src"
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - uses: actions/setup-node@v6
       - run: pip install --group format
         working-directory: src
@@ -40,7 +40,7 @@ jobs:
       - run: sudo apt-get install libblas-dev liblapack-dev
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - run: >
           pip install
           --group lint
@@ -64,16 +64,16 @@ jobs:
           - ubuntu-24.04
           - ubuntu-24.04-arm
         py:
-          # - "3.10"
           # - "3.11"
-          - "3.12"
+          # - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
         include:
           - os: macos-26 # arm64
-            py: "3.14"
+            py: "3.15"
           - os: macos-26-intel
-            py: "3.14"
+            py: "3.15"
     steps:
       - uses: actions/checkout@v6
       - run: sudo apt-get install libblas-dev liblapack-dev
