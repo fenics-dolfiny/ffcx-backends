@@ -52,6 +52,8 @@ jobs:
       - run: mypy test/
       - run: ty check ffcx_backends/
       - run: ty check test/
+      - run: pyrefly check ffcx_backends/
+      - run: pyrefly check test/
 
   test:
     name: ⚙️
