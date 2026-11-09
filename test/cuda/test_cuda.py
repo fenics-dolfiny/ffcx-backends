@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 
+import ffcx.main
 import pytest
 
 pytest.importorskip("nvidia.cuda_nvrtc", reason="NVRTC not available on all platforms.")
@@ -47,7 +48,7 @@ def test_compiler_arg_count(nvrtc_compiler: None) -> None:
         assert "Usage:" in str(error.value)
 
 
-def test_demo_nvrtc(nvrtc_compiler: None) -> None:
+def test_sample_integral(nvrtc_compiler: None) -> None:
     cuda = Path(__file__).parent
     build = cuda / "nvrtc_compiler" / "build"
     source = cuda / "sample_integral.cu"
@@ -56,3 +57,16 @@ def test_demo_nvrtc(nvrtc_compiler: None) -> None:
         ["./nvrtc_compiler", source],
         cwd=build,
     )
+
+
+@pytest.mark.parametrize("dtype", ["float32", "float64"])
+def test_poisson(nvrtc_compiler: None, dtype: str) -> None:
+    opts = f"--language ffcx_backends.cuda --scalar_type {dtype}"
+    directory = Path(__file__).parent.parent
+    assert ffcx.main.main([str(directory / "poisson.py"), *opts.split(" ")]) == 0
+
+    cuda = Path(__file__).parent
+    build = cuda / "nvrtc_compiler" / "build"
+    source = cuda / "sample_integral.cu"
+
+    subprocess.check_call([build / "nvrtc_compiler", source], cwd=build)
