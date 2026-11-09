@@ -1,12 +1,22 @@
 WarningsAsErrors: "*"
 UseColor: true
+HeaderFilterRegex: ".*"
+ExcludeHeaderFilterRegex: "poisson\\.hpp$"
 Checks: >
   *,
   -llvmlibc*,
   -altera-unroll-loops,
+  -bugprone-std-namespace-modification,
+  -cert-dcl58-cpp,
   -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -fuchsia-default-arguments-calls,
+  -fuchsia-overloaded-operator,
+  -fuchsia-trailing-return,
+  -llvm-header-guard,
+  -misc-use-internal-linkage,
+  -portability-avoid-pragma-once,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-magic-numbers,
