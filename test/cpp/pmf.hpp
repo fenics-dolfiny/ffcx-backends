@@ -13,33 +13,33 @@ public:
   {
   }
   template<typename U>
-  pmf(U value) noexcept
+  explicit(false) pmf(U value) noexcept
     : _value(static_cast<T>(value))
   {
   }
-  constexpr T value() const noexcept { return _value; }
-  constexpr pmf& operator+=(pmf<T> other) noexcept
+  [[nodiscard]] constexpr auto value() const noexcept -> T { return _value; }
+  constexpr auto operator+=(pmf<T> other) noexcept -> pmf&
   {
     _value += other._value;
     return *this;
   }
 
-  friend constexpr pmf<T> operator*(pmf<T> a, pmf<T> b) noexcept
+  friend constexpr auto operator*(pmf<T> a, pmf<T> b) noexcept -> pmf<T>
   {
     return pmf<T>(a._value * b._value);
   }
 
-  friend constexpr pmf<T> operator/(pmf<T> a, pmf<T> b) noexcept
+  friend constexpr auto operator/(pmf<T> a, pmf<T> b) noexcept -> pmf<T>
   {
     return pmf<T>(a._value / b._value);
   }
 
-  friend constexpr pmf<T> operator+(pmf<T> a, pmf<T> b) noexcept
+  friend constexpr auto operator+(pmf<T> a, pmf<T> b) noexcept -> pmf<T>
   {
     return pmf<T>(a._value + b._value);
   }
 
-  friend constexpr pmf<T> operator-(pmf<T> a) noexcept
+  friend constexpr auto operator-(pmf<T> a) noexcept -> pmf<T>
   {
     return pmf<T>(-a._value);
   }
@@ -47,9 +47,9 @@ public:
 
 namespace std {
 template<typename T>
-constexpr pmf<T>
-abs(const pmf<T>& a) noexcept
+constexpr auto
+abs(const pmf<T>& a) noexcept -> pmf<T>
 {
   return pmf<T>(std::abs(a.value()));
 }
-}
+} // namespace std
