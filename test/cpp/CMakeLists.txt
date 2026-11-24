@@ -48,8 +48,19 @@ add_custom_target(
     COMMENT "Compile poisson.py using FFCx"
 )
 
+add_custom_target(
+    interpolation_kernel
+    COMMAND
+        ffcx --language ffcx_backends.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../interpolation.py -d
+        ${CMAKE_CURRENT_BINARY_DIR}
+    VERBATIM
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interpolation.py
+    COMMENT "Compile interpolation.py using FFCx"
+)
+
 add_executable(kernel kernel.cpp)
-add_dependencies(kernel poisson_kernel)
+add_dependencies(kernel poisson_kernel interpolation_kernel)
 
 if(ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY NAMES clang-tidy REQUIRED)

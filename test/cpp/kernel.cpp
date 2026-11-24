@@ -1,11 +1,16 @@
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <complex>
+#include <concepts>
 #include <cstddef>
+#include <limits>
 
 #include <gtest/gtest.h>
 
 #include "pmf.hpp"
 
+#include "interpolation.hpp"
 #include "poisson.hpp"
 
 template<typename T>
@@ -58,6 +63,31 @@ void
 EXPECT_SCALAR_EQ(const pmf<T>& a, const pmf<T>& b)
 {
   EXPECT_SCALAR_EQ(a.value(), b.value());
+}
+
+// Equal up to a few rounding errors, relative to the expected value b.
+template<std::floating_point T>
+void
+EXPECT_SCALAR_NEAR(T a, T b)
+{
+  const T tol =
+    16 * std::numeric_limits<T>::epsilon() * std::max(T{ 1 }, std::abs(b));
+  EXPECT_NEAR(a, b, tol);
+}
+
+template<typename T>
+void
+EXPECT_SCALAR_NEAR(const std::complex<T>& a, const std::complex<T>& b)
+{
+  EXPECT_SCALAR_NEAR(std::real(a), std::real(b));
+  EXPECT_SCALAR_NEAR(std::imag(a), std::imag(b));
+}
+
+template<typename T>
+void
+EXPECT_SCALAR_NEAR(const pmf<T>& a, const pmf<T>& b)
+{
+  EXPECT_SCALAR_NEAR(a.value(), b.value());
 }
 
 using ScalarTypes = ::testing::Types<float,
@@ -151,5 +181,76 @@ TYPED_TEST(Kernel, Expression)
 
   for (std::size_t i = 0; i < e.size(); ++i) {
     EXPECT_SCALAR_EQ(e[i], e_expected[i]);
+  }
+}
+
+// The interpolation tests share a coefficient, in P2, and a cell of area 3,
+// see interpolation.py.
+
+TYPED_TEST(Kernel, InterpolationProxyCoefficient)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const typename form_interpolation_proxy_coefficient<scalar_t, geo_t>::
+    integral_triangle_all integral;
+
+  std::array<scalar_t, 1> A{ 0 };
+  const std::array<scalar_t, 0> c{};
+  const std::array<scalar_t, 6> w{ 0.5, -1.0, 2.0, 0.3, 0.7, -0.2 };
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 2, 0, 0, 0, 3, 0 };
+
+  integral.tabulate_tensor(
+    A.data(), w.data(), c.data(), coords.data(), nullptr, nullptr);
+
+  // area / 3 * (w_0^2 + w_1^2 + w_2^2)
+  EXPECT_SCALAR_NEAR(A[0], scalar_t(5.25));
+}
+
+TYPED_TEST(Kernel, InterpolationRuntimeTable)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const typename form_interpolation_runtime_table<scalar_t,
+                                                  geo_t>::integral_triangle_all
+    integral;
+
+  std::array<scalar_t, 6> A{ 0 };
+  const std::array<scalar_t, 0> c{};
+  const std::array<scalar_t, 6> w{ 0.5, -1.0, 2.0, 0.3, 0.7, -0.2 };
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 2, 0, 0, 0, 3, 0 };
+
+  integral.tabulate_tensor(
+    A.data(), w.data(), c.data(), coords.data(), nullptr, nullptr);
+
+  // area / 3 * w_i at the vertices, the edge dofs vanish there
+  const std::array<scalar_t, 6> A_expected{ 0.5, -1.0, 2.0, 0, 0, 0 };
+
+  for (std::size_t i = 0; i < A.size(); ++i) {
+    EXPECT_SCALAR_NEAR(A[i], A_expected[i]);
+  }
+}
+
+TYPED_TEST(Kernel, InterpolationNestedExpression)
+{
+  using scalar_t = TypeParam;
+  using geo_t = real_t<scalar_t>;
+
+  const expression_interpolation_nested<scalar_t, geo_t> expr;
+
+  std::array<scalar_t, 3> e{ 0 };
+  const std::array<scalar_t, 1> c{ 2.5 };
+  const std::array<scalar_t, 6> w{ 0.5, -1.0, 2.0, 0.3, 0.7, -0.2 };
+  const std::array<geo_t, 9> coords{ 0, 0, 0, 2, 0, 0, 0, 3, 0 };
+
+  expr.tabulate_tensor(
+    e.data(), w.data(), c.data(), coords.data(), nullptr, nullptr, nullptr);
+
+  // The P1 interpolant of c * w_i^3, at the points
+  const std::array<scalar_t, 3> e_expected{ 2.0, 2.5625, 9.453125 };
+
+  for (std::size_t i = 0; i < e.size(); ++i) {
+    EXPECT_SCALAR_NEAR(e[i], e_expected[i]);
   }
 }

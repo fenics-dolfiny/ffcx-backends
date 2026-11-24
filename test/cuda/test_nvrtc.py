@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 
+import ffcx.main
 import pytest
 
 pytest.importorskip("nvidia.cuda_nvrtc", reason="NVRTC not available on all platforms.")
@@ -55,4 +56,15 @@ def test_demo_nvrtc(nvrtc_compiler: None) -> None:
     subprocess.check_call(
         ["./nvrtc_compiler", source],
         cwd=build,
+    )
+
+
+def test_interpolation_nvrtc(nvrtc_compiler: None, tmp_path: Path) -> None:
+    opts = ["--language", "ffcx_backends.cuda", "--scalar_type", "float64", "-d", str(tmp_path)]
+    source = cuda_dir.parent / "interpolation.py"
+    assert ffcx.main.main([str(source), *opts]) == 0
+
+    subprocess.check_call(
+        ["./nvrtc_compiler", tmp_path / "interpolation.cu"],
+        cwd=build_dir,
     )
