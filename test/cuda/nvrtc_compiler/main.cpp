@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <nvrtc.h>
+#include <optional>
 #include <sstream>
 #include <vector>
 
@@ -24,7 +25,7 @@ quit(int exit_code)
   return exit_code;
 }
 
-std::string
+std::optional<std::string>
 nvrtc_compile(const std::string& source)
 {
   nvrtcProgram prog;
@@ -35,7 +36,7 @@ nvrtc_compile(const std::string& source)
   if (res != NVRTC_SUCCESS) {
     std::cerr << "Failed to create program: " << nvrtcGetErrorString(res)
               << "\n";
-    quit(EXIT_FAILURE);
+    return std::nullopt;
   }
 
   res = nvrtcCompileProgram(prog, 0, nullptr);
@@ -45,7 +46,8 @@ nvrtc_compile(const std::string& source)
     std::string log(logSize, '\0');
     nvrtcGetProgramLog(prog, &log[0]);
     std::cerr << "Compilation failed:\n" << log << "\n";
-    quit(EXIT_FAILURE);
+    nvrtcDestroyProgram(&prog);
+    return std::nullopt;
   }
 
   // Get PTX
@@ -92,6 +94,10 @@ main(int argc, char* argv[])
   // std::cout << kernel_code << std::endl;
 
   auto ptx = nvrtc_compile(kernel_code);
+  if (!ptx) {
+    std::cerr << "Compilation failed." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   // TODO: add flag to control output
   // std::cout << "PTX code:\n" << ptx << "\n";
