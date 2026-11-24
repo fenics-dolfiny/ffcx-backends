@@ -1,7 +1,7 @@
 WarningsAsErrors: "*"
 UseColor: true
 HeaderFilterRegex: ".*"
-ExcludeHeaderFilterRegex: "poisson\\.hpp$"
+ExcludeHeaderFilterRegex: "(poisson|interpolation)\\.hpp$"
 Checks: >
   *,
   -llvmlibc*,

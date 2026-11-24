@@ -45,7 +45,8 @@ format = ["ruff", "yamllint", "typos", "gersemi", "clang-format"]
 lint = ["mypy", "pyrefly", "ty", "ruff"]
 dev = [
   "fenics-basix@git+https://github.com/fenics/basix@main",
-  "fenics-ffcx@git+https://github.com/fenics/ffcx@main",
+  # TODO: back to main once interpolation support is merged into FFCx
+  "fenics-ffcx@git+https://github.com/fenics/ffcx@schnellerhase/interpolate-4-numba",
   "fenics-ufl@git+https://github.com/fenics/ufl@main",
 ]
 

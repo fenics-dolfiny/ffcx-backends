@@ -140,6 +140,18 @@ class Formatter:
         return f"{cstr}{typename} {symbol}{dims} = {vals};\n"
 
     @__call__.register
+    def format_call(self, call: L.CallOp) -> str:
+        """Format a call to the kernel of an interpolation.
+
+        The kernel is the class template generated earlier in the same file, see
+        `expression.interpolation_kernel`. The arguments are those of a ufcx
+        `tabulate_tensor`, whose last, `custom_data`, the C++ kernels do not take.
+        """
+        *args, _custom_data = call.args
+        formatted = ", ".join(self(arg) for arg in args)
+        return f"{call.func}<T, U>::tabulate_tensor({formatted});\n"
+
+    @__call__.register
     def format_array_access(self, arr: L.ArrayAccess) -> str:
         """Format array access."""
         name = self(arr.array)
@@ -318,6 +330,27 @@ using {name_from_uflfile} = {factory_name}<T, U>;
 // End of code for expression {factory_name}
 """
 
+    interpolation_kernel = """
+// Code for interpolation kernel {factory_name}
+
+template <typename T, typename U>
+class {factory_name}
+{{
+public:
+  static void tabulate_tensor(T* RESTRICT A,
+                              const T* RESTRICT w,
+                              const T* RESTRICT c,
+                              const U* RESTRICT coordinate_dofs,
+                              const std::int32_t* RESTRICT entity_local_index,
+                              const std::uint8_t* RESTRICT quadrature_permutation)
+  {{
+  {tabulate_expression}
+  }}
+}};
+
+// End of code for interpolation kernel {factory_name}
+"""
+
     @staticmethod
     def generator(ir: ExpressionIR, options: dict[str, int | float | npt.DTypeLike]) -> tuple[str,]:
         """Generate UFC code for an expression."""
@@ -339,6 +372,12 @@ using {name_from_uflfile} = {factory_name}<T, U>;
         scalar_geometry = True if options.get("scalar_geometry") else False
         formatter = Formatter(scalar_geometry)
         d["tabulate_expression"] = formatter(parts)
+
+        if ir.is_interpolation_kernel:
+            # Called from the kernels that hold the interpolation, which are
+            # generated after it in the same file, so it is not exported.
+            d = {key: d[key] for key in template_keys(expression.interpolation_kernel)}
+            return (expression.interpolation_kernel.format_map(d),)
 
         if len(ir.original_coefficient_positions) > 0:
             values = ", ".join(str(i) for i in ir.original_coefficient_positions)
